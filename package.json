@@ -2,6 +2,7 @@
   "author": "",
   "dependencies": {
     "express": "4.18.2",
+    "module-alias": "^2.2.3",
     "mongoose": "^7.5.1"
   },
   "description": "",
@@ -26,10 +27,15 @@
   "main": "index.js",
   "name": "back-goatstats",
   "scripts": {
-    "dev": "ts-node-dev -r tsconfig-paths/register src/server.ts",
-    "start": "node build/server.js",
+    "dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
+    "start": "node build/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "tsc"
+  },
+  "_moduleAliases": {
+    "@root": ".",
+    "@config": "build/config/",
+    "@database": "build/database/"
   },
   "version": "1.0.0"
 }
