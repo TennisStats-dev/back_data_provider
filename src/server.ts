@@ -1,7 +1,7 @@
-import { app } from "index"
-import config from "@config/config"
+import { app } from 'index'
+import config from '@config/index'
 
-config.connectDB()
+config.database.connectDB()
 
 app.listen(config.server.port, () => {
 	console.log(`Server running on port ${config.server.port}`)
