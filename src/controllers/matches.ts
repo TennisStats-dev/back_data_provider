@@ -1,6 +1,6 @@
 import Court from '@database/models/court.model'
 import Match from '@database/models/match.model'
-import Player from '@database/models/player.model'
+import {Player} from '@database/models/player.model'
 import PreMatch from '@database/models/preMatch.model'
 import Team from '@database/models/team.model'
 import Tournament from '@database/models/tournament.model'

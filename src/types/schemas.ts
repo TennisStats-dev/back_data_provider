@@ -1,5 +1,5 @@
 import { type countriesCC } from 'constants/countries'
-import type { matchStatusCode, matchRound, gender, ground, gameResult, matchType, bestoOfSets, consistency, playerOption } from 'constants/data'
+import type { matchStatusCode, matchRound, gender, ground, gameResult, matchType, bestoOfSets, consistency, playerOption, hours } from 'constants/data'
 
 export type CountriesCC = (typeof countriesCC)[number]
 
@@ -20,6 +20,8 @@ export type BestOfSets = (typeof bestoOfSets)[number]
 export type Consistency = (typeof consistency)[number]
 
 export type PlayerOption = (typeof playerOption)[number]
+
+export type Hours = (typeof hours)[number]
 
 export interface IPlayer {
 	api_id: number
@@ -104,14 +106,24 @@ export interface IMatch extends IPreMatch {
 	sets_stats: ISetStats[]
 }
 
-export interface IRanking {
+export interface IPlayerRanking {
 	rank: number
 	player: IPlayer | ITeam
 	points: number
 	tourn_played: number
 }
 
-export interface IRequestsInfo {
+export interface IRanking {
 	date: Date
+	ranking: IPlayerRanking[]
+}
+
+interface IPetitions {
+	hour: Hours
 	petitions: number
+}
+
+export interface IRequestsInfo {
+	day: Date
+	hours: IPetitions[]
 }

@@ -16,5 +16,6 @@ const playerSchema = new Schema<IPlayer>(
 )
 
 const Player = model<IPlayer>('Player', playerSchema)
+const TempPlayer = model<IPlayer>('TempPlayer', playerSchema)
 
-export default Player
+export {Player, TempPlayer}
