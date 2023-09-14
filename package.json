@@ -37,7 +37,9 @@
   "_moduleAliases": {
     "@root": ".",
     "@config": "build/config/",
-    "@database": "build/database/"
+    "@database": "build/database/",
+    "@customTypes": "build/types/"
+
   },
   "version": "1.0.0"
 }

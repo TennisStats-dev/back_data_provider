@@ -5,6 +5,8 @@ import express from 'express'
 import matches from './routes/matches'
 import config from '@config/index'
 import logger from '@config/logger'
+// import { createPlayer } from '@controllers/matches'
+
 
 export const app = express()
 app.use(express.json())
@@ -16,12 +18,14 @@ app.get('/ping', (_, res) => {
 
 app.use('/api/matches', matches)
 
+
 config.database.connectDB()
 
+
+	// const newPlayer = createPlayer
+	// logger.info(newPlayer)
+	// logger.info(new Date)
+
 app.listen(config.server.port, () => {
-	logger.info('logger running')
-	logger.warn('warn text')
-	logger.error('error text')
-	logger.error(new Error('errror'))
-	console.log(`Server running on port ${config.server.port}`)
+	logger.info(`Server running on port ${config.server.port}`)
 })
