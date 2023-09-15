@@ -27,7 +27,7 @@ export interface IPlayer {
 	api_id: number
 	name: string
 	gender: Gender
-	birth?: Date
+	birth?: Date 
 	cc?: CountriesCC
 	image_id?: string
 }
@@ -44,7 +44,7 @@ export interface ITournament {
 	best_of_sets: BestOfSets
 	ground: Ground
 	city: string
-	cc: CountriesCC
+	cc?: CountriesCC
 }
 
 export interface ICourt {
@@ -118,12 +118,12 @@ export interface IRanking {
 	ranking: IPlayerRanking[]
 }
 
-interface IPetitions {
-	hour: Hours
-	petitions: number
+interface IRequests {
+	number: Hours
+	requests: number
 }
 
 export interface IRequestsInfo {
-	day: Date
-	hours: IPetitions[]
+	date: string
+	hour: IRequests[]
 }

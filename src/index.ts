@@ -1,12 +1,11 @@
 // import module-alias from package.jdon once compiled (prod). It crashes the ts-node-dev if build folder is not up to date
 // import 'module-alias/register'
 
+import 'dotenv/config'
 import express from 'express'
 import matches from './routes/matches'
 import config from '@config/index'
 import logger from '@config/logger'
-// import { createPlayer } from '@controllers/matches'
-
 
 export const app = express()
 app.use(express.json())
@@ -18,14 +17,12 @@ app.get('/ping', (_, res) => {
 
 app.use('/api/matches', matches)
 
-
 config.database.connectDB()
-
-
-	// const newPlayer = createPlayer
-	// logger.info(newPlayer)
-	// logger.info(new Date)
 
 app.listen(config.server.port, () => {
 	logger.info(`Server running on port ${config.server.port}`)
 })
+
+
+
+

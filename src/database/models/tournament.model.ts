@@ -4,7 +4,7 @@ import { Schema, model } from 'mongoose'
 import { countriesCC } from 'constants/countries'
 
 const tournamentSchema = new Schema<ITournament>(
-	{
+{
 		api_id: { type: Number, required: true },
 		name: { type: String, required: true },
 		best_of_sets: { type: Number, enum: bestoOfSets, required: true },

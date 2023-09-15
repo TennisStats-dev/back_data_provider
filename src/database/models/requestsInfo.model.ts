@@ -4,17 +4,17 @@ import { hours } from 'constants/data'
 
 const requestsInfoSchema = new Schema<IRequestsInfo>(
 	{
-		day: { type: Date, required: true },
-		hours: [
+		date: { type: String, required: true },
+		hour: [
 			{
-				hour: { type: Date, enum: hours, required: true },
-                petitions: { type: Number, required: true },
+				number: { type: Number, enum: hours, required: true },
+                requests: { type: Number, default: 0, required: true },
 			},
 		],
 	},
 	{ timestamps: true },
 )
 
-const RequestsInfo = model<IRequestsInfo>('Team', requestsInfoSchema)
+const Request = model<IRequestsInfo>('Request', requestsInfoSchema)
 
-export default RequestsInfo
+export default Request
