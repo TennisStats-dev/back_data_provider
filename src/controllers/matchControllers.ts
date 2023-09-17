@@ -1,146 +1,142 @@
+// import { getMatchType } from 'services/match.services'
+// import type { Request, Response } from 'express'
+// import { type UpcomingMatches } from 'API/types/upcomingMatches'
+// import { gender, pOption } from 'constants/data'
+// import config from '@config/index'
+// import { createNewPlayerObject } from 'services/player.services'
+// import type { ICourt, IPlayer, ITeam, ITournament } from 'types/schemas'
+// import { createNewTeamObject } from 'services/team.services'
+// import { markRaw } from 'vue'
 
-// import { UpcomingMatches } from "types/fetchingRes/upcomingMatches"
-
-import { checkIfPlayerExists } from "@database/services/player.services"
-
-export const saveUpcomingMatches = async (): Promise<void>  => {
-    
-    const res = await checkIfPlayerExists(15416)
-
-    console.log(res)
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import Court from '@database/models/court.model'
-// import Match from '@database/models/match.model'
-// import {Player} from '@database/models/player.model'
-// import PreMatch from '@database/models/preMatch.model'
-// import Team from '@database/models/team.model'
-// import Tournament from '@database/models/tournament.model'
-// import type {
-// 	ITeam,
-// 	IPlayer,
-// 	ICourt,
-// 	ITournament,
-// 	IPreMatch,
-// 	IMatch,
-// } from 'types/schemas'
-
-// export const createPlayer = async (): Promise<string> => {
+// export const saveUpcomingMatches = async (_req: Request, _res: Response): Promise<void> => {
 // 	try {
-// 		const newPlayer1 = new Player<IPlayer>({
-// 			api_id: 1,
-// 			name: 'vega',
-// 			gender: 'F',
-// 			cc: 'es',
-// 		})
-// 		const newPlayer2 = new Player<IPlayer>({
-// 			api_id: 2,
-// 			name: 'Judit',
-// 			gender: 'F',
-// 			cc: 'es',
-// 		})
+// 		const allUpcomingMatches: UpcomingMatches[] = []
+// 		let page = 1
 
-// 		const newTeam = new Team<ITeam>({
-// 			api_id: 3,
-// 			team_p1: newPlayer1,
-// 			team_p2: newPlayer2,
+// 		const upcomingMatchesApiResponse = await config.api.services.getUpcomingMatches(page)
+// 		allUpcomingMatches.push(...upcomingMatchesApiResponse.results)
+
+// 		do {
+// 			page += 1
+// 			const apiResponse = await config.api.services.getUpcomingMatches(page)
+// 			allUpcomingMatches.push(...apiResponse.results)
+// 			console.log('upcoming matches es', allUpcomingMatches.length)
+// 		} while (allUpcomingMatches.length < upcomingMatchesApiResponse.pager.total)
+
+// 		allUpcomingMatches.map(async (match) => {
+// 			const matchId = Number(match.id)
+
+// 			if ((await config.database.services.getters.getPreMatch(matchId)) !== null) {
+// 				return
+// 			}
+
+// 			const matchType = getMatchType(match.home.name, match.away.name, match.league.name, Number(match.league.id))
+// 			const matchGender = matchType.type === 'MD' || matchType.type === 'WD' ? gender.female : gender.male
+
+// 			let tournament: ITournament
+// 			let p1: IPlayer | ITeam
+// 			let p2: IPlayer | ITeam
+// 			let court_id: ICourt
+
+// 			const playersArray: IPlayer[] = [
+// 				createNewPlayerObject(Number(match.home.id), match.home.name, matchGender, match.home.cc),
+// 				createNewPlayerObject(Number(match.away.id), match.away.name, matchGender, match.away.cc),
+// 			]
+
+// 			if (matchType.type === 'MD' || matchType.type === 'WD') {
+// 				const teamsPromises = playersArray.map(async (teamData, i) => {
+// 					const teamDB = await config.database.services.getters.getTeam(Number(teamData.api_id))
+
+// 					if (teamDB !== null) {
+// 						if (i === 0) {
+// 							p1 = teamDB
+// 						} else {
+// 							p2 = teamDB
+// 						}
+// 					} else {
+// 						const players: IPlayer[] = []
+
+// 						const team1Data = await config.api.services.getTeamMembers(teamData.api_id)
+
+// 						const teamPlayersPromises = team1Data.map(async (player, j): Promise<void> => {
+// 							const playerDB = await config.database.services.getters.getPlayer(Number(player.id))
+
+// 							if (playerDB != null) {
+// 								players[j] = playerDB
+// 							} else {
+// 								const playerObject = createNewPlayerObject(Number(player.id), player.name, matchGender, player.cc)
+// 								const savedPlayer = await config.database.services.savers.saveNewTempPlayer(playerObject)
+// 								players[j] = savedPlayer
+// 							}
+// 						})
+
+// 						await Promise.allSettled(teamPlayersPromises)
+
+// 						const teamObject: ITeam = {
+// 							api_id: teamData.api_id,
+// 							team_p1: players[0],
+// 							team_p2: players[1],
+// 						}
+
+// 						const teamDB = await config.database.services.savers.saveNewTempTeam(teamObject)
+
+// 						if (i === 0) {
+// 							p1 = teamDB
+// 						} else {
+// 							p2 = teamDB
+// 						}
+// 					}
+// 				})
+
+//                 await Promise.allSettled(teamsPromises)
+
+// 			} else if (matchType.type === 'M' || matchType.type === 'W') {
+// 				const players: IPlayer[] = []
+
+// 				const playersPromises = playersArray.map(async (player, j): Promise<void> => {
+// 					const playerDB = await config.database.services.getters.getPlayer(Number(player.api_id))
+
+// 					if (playerDB != null) {
+// 						players[j] = playerDB
+// 					} else {
+// 						const savedPlayer = await config.database.services.savers.saveNewTempPlayer(playersArray[j])
+// 						players[j] = savedPlayer
+// 					}
+// 				})
+
+// 				await Promise.allSettled(playersPromises)
+
+// 				p1 = players[0]
+// 				p2 = players[1]
+// 			} else if (matchType.type === 'DC') {
+// 				const players: IPlayer[] = []
+
+// 				const playersPromises = playersArray.map(async (player, j): Promise<void> => {
+// 					const playerDB = await config.database.services.getters.getPlayer(Number(player.api_id))
+
+// 					if (playerDB != null) {
+// 						players[j] = playerDB
+// 					} else {
+// 						const savedPlayer = await config.database.services.savers.saveNewTempPlayer(playersArray[j])
+// 						players[j] = savedPlayer
+// 					}
+// 				})
+
+// 				await Promise.allSettled(playersPromises)
+
+// 				p1 = players[0]
+// 				p2 = players[1]
+// 			}
+
+//             const tournamentDB = await config.database.services.getters.getTournament(Number(match.league.id))
+            
+//             if(tournamentDB !== null) {
+//                 tournament = tournamentDB
+//             } else {
+//                 const tournamentObject = crea
+//             }
 // 		})
-
-// 		const newCourt = new Court<ICourt>({
-// 			api_id: 5,
-// 			name: 'Philip Chatrie',
-// 		})
-
-// 		const newTournament = new Tournament<ITournament>({
-// 			api_id: 6,
-// 			name: 'Roland Garros',
-// 			best_of_sets: 5,
-// 			ground: 'clay',
-// 			city: 'Paris',
-// 			cc: 'fr',
-// 		})
-
-// 		const newPreMatch = new PreMatch<IPreMatch>({
-// 			api_id: 9,
-// 			bet365_id: 8,
-// 			sport_id: 13,
-// 			type: 'W',
-// 			round: 'F',
-// 			tournament: newTournament,
-// 			court: newCourt,
-// 			p1: newPlayer1,
-// 			p2: newPlayer2,
-// 			status: 0,
-// 			est_time: new Date(),
-// 		})
-
-// 		const newMatch = new Match<IMatch>({
-// 			api_id: 10,
-// 			bet365_id: 8,
-// 			sport_id: 13,
-// 			type: 'W',
-// 			round: 'F',
-// 			tournament: newTournament,
-// 			court: newCourt,
-// 			p1: newPlayer1,
-// 			p2: newPlayer2,
-// 			status: 0,
-// 			est_time: new Date(),
-// 			b365_start_time: new Date(),
-// 			b365_end_time: new Date(),
-// 			match_stats: {
-// 				result: ['6-4', '7-5'],
-// 				aces: [5, 0],
-// 				df: [3, 0],
-// 				win_1st_serve: [50, 60],
-// 				bp: [50, 40],
-// 			},
-// 			sets_stats: [
-// 				{
-// 					number: 1,
-// 					games_stats: [
-// 						{
-// 							summary: 'hold to 30',
-// 							consistency: 2,
-// 							service: 1,
-// 							winner: 1,
-// 							won_points: [4, 2],
-// 							total_bp: 0,
-// 							total_aces: 1,
-// 							points: [
-// 								{
-// 									result: '15-0',
-// 								},
-// 							],
-// 						},
-// 					],
-// 				},
-// 			],
-// 		})
-
-		// await newPlayer1.save()
-// 		await newPlayer2.save()
-// 		await newTeam.save()
-// 		await newCourt.save()
-// 		await newTournament.save()
-// 		await newPreMatch.save()
-// 		await newMatch.save()
-
-// 		return 'Everything created succesfully'
 // 	} catch (err) {
 // 		console.log(err)
-// 		return 'Error to create a new player'
 // 	}
 // }

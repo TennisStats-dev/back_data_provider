@@ -3,7 +3,7 @@ import { Schema, model } from 'mongoose'
 
 const teamSchema = new Schema<ITeam>(
 	{
-		api_id: { type: Number, required: true },
+		api_id: { type: Number, required: true, unique: true },
 		team_p1: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
 		team_p2: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
 	},
@@ -11,5 +11,6 @@ const teamSchema = new Schema<ITeam>(
 )
 
 const Team = model<ITeam>('Team', teamSchema)
+const TempTeam = model<ITeam>('TempTeam', teamSchema)
 
-export default Team
+export {Team, TempTeam}

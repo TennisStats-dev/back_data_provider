@@ -1,7 +1,7 @@
 import type winston from 'winston'
 import { format, createLogger, transports } from 'winston'
 import { MongoDB } from 'winston-mongoDB'
-import config from '..'
+// import config from '..'
 const { timestamp, combine, errors, json } = format
 
 export function buildProdLogger(): winston.Logger {
@@ -12,7 +12,7 @@ export function buildProdLogger(): winston.Logger {
             new transports.Console({level: 'info'}),
             new MongoDB({
                 level: 'warn',
-                db: config.database.dbURL,
+                db: `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_CLUSTER}.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
                 options: { useUnifiedTopology: true, },
                 collection: 'serverdata'
             }),

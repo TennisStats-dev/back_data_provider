@@ -1,5 +1,6 @@
-import MONGO from '@database/config'
-import { API } from 'API/config'
+
+import MONGODB from '@database/index'
+import { API } from 'API'
 
 const SERVER_HOSTNAME = process.env.SERVER_HOSTNAME ?? 'localhost'
 const SERVER_PORT = process.env.SERVER_PORT ?? 3000
@@ -11,7 +12,7 @@ const SERVER = {
 
 const config = {
 	server: SERVER,
-	database: MONGO,
+	database: MONGODB,
 	api: API,
 }
 

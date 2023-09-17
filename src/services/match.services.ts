@@ -1,51 +1,50 @@
-// import config from "@config/index"
-// import logger from "@config/logger"
-// import { getUpcomingMatchesApiData } from "./axios.services"
-// import type { UpcomingMatches } from "types/fetchingRes/upcomingMatches"
-// import { IPreMatch } from "types/schemas"
+import type { Gender, Type } from 'types/schemas'
+import { checkIfIsTeam } from './team.services'
+import { checkIfIsDoubles, checkIfIsMen, checkIfIsMixedType, checkIfIsWomen } from './tournament.services'
+import logger from '@config/logger'
+import { gender, type } from 'constants/data'
 
-// export const getUpcomingMatches = async (): Promise<void> => {
-    
-//     const allUpcomingMatches: UpcomingMatches[] = []
-//     const page = 1
+export const getMatchType = (p1Name: string, p2Name: string, tournamentName: string, tournamentId: number): {gender: Gender, type: Type} => {
+	if (checkIfIsMixedType(tournamentName)) {
+		return {
+            gender: gender.male,
+            type: type.davisCup
+        }
+	}
 
-    
-//     do {
-//         const apiResponse = await getUpcomingMatchesApiData()
-//         if (apiResponse === null) return
-//         const upcomingMatches: IPreMatch[] = apiResponse.results.map(match => {
+	const isDoubles = checkIfIsDoubles(tournamentName) || (checkIfIsTeam(p1Name) && checkIfIsTeam(p2Name))
 
+	const isWomen = checkIfIsWomen(tournamentName)
 
-//             return {
-//                 api_id: match.id,
-//                 bet365_id: match.bet365_id,
-//                 sport_id: match.sport_id,
-//                 type: 
-//             }
-//         })
+	const isMen = checkIfIsMen(tournamentName)
 
-//     } while {
-//         allUpcomingMatches.length = 
-//     }
+	if (!isWomen && !isMen) {
+		logger.warn(`It's not possible to recognize GENDER for TOURNAMENT: ${tournamentName} with ID: ${tournamentId}`)
+	}
 
+	if (isDoubles && isWomen) {
+		return {
+            gender: gender.female,
+            type: type.womenDoubles,
+        }
+	} else if (isDoubles && !isWomen) {
+		return {
+            gender: gender.male,
+            type: type.menDoubles,
+        }
+	} else if (!isDoubles && isWomen) {
+		return {
+            gender: gender.female,
+            type: type.women,
+        }
+	} else {
+		return {
+            gender: gender.male,
+            type: type.men,
+        }
+	}
+}
 
-
-
-//     allUpcomingMatches.push(upcomingMatches.results)
-
-//     const totalMatches = upcomingMatches.pager.total
-
-//     const fetchsNeeded = Math.round(totalMatches / config.api.resultsPerPage) - 1
-
-
-//     for (let i = 2; i <= fetchsNeeded; i++) {
-//         const new50UpcomingMatches = await getUpcomingMatchesApiData(i)
-//         if (new50UpcomingMatches !== null) {
-//             allUpcomingMatches.push(...new50UpcomingMatches.results)
-//         }
-//     }
-
-//     logger.info(totalMatches)
-//     logger.info(fetchsNeeded)
-//     console.log(allUpcomingMatches.length)
-// }
+export const checkIfIsTennisMatch = (sportId: number): boolean => {
+	return sportId === 13
+}

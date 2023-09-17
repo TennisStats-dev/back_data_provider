@@ -15,6 +15,6 @@ const requestsInfoSchema = new Schema<IRequestsInfo>(
 	{ timestamps: true },
 )
 
-const Request = model<IRequestsInfo>('Request', requestsInfoSchema)
+const RequestsInfo = model<IRequestsInfo>('RequestsInfo', requestsInfoSchema)
 
-export default Request
+export default RequestsInfo

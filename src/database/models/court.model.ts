@@ -3,7 +3,7 @@ import { Schema, model } from 'mongoose'
 
 const courtSchema = new Schema<ICourt>(
 	{
-		api_id: { type: Number, required: true },
+		api_id: { type: Number, required: true, unique: true },
 		name: { type: String, required: true },
 	},
 	{ timestamps: true },

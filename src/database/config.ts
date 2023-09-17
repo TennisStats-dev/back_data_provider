@@ -15,7 +15,7 @@ function mongo(): void {
 			logger.error(err)
 		})
 	} else {
-		if (process.env.NODE_ENV === 'development') {
+		if (!(process.env.NODE_ENV === 'development')) {
 			mongoose
 			.connect(dbURL)
 			.then(() => {

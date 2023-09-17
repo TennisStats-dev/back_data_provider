@@ -4,7 +4,7 @@ const { printf, timestamp, combine, colorize, errors } = format
 
 export function buildDevLogger(): winston.Logger {
 	const logFormat = printf(({ level, message, timestamp, stack }) => {
-		return `${timestamp} ${level} ${stack ?? message}`
+		return `${timestamp} | ${level} | ${stack ?? message}`
 	})
 
 	return createLogger({

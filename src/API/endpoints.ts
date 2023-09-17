@@ -3,7 +3,7 @@ const BASE_URLS = {
 	endedMatches: process.env.API_ENDED_MATCHES_URL,
 	matchView: process.env.API_MATCH_VIEW_URL,
 	matchOdds: process.env.API_MATCH_ODDS_URL,
-	teamInfo: process.env.API_TEAM_INFO_URL,
+	teamMembers: process.env.API_TEAM_INFO_URL,
 }
 
 const PARAM_KEYS = {
@@ -19,14 +19,10 @@ const PARAM_VALUES = {
 	tennisID: 13,
 }
 
-const RESULTS_PER_PAGE = 50
-
-const REQ_HOUR_CAP = 3500
-
-export const API = {
-	baseURL: BASE_URLS,
-	paramKeys: PARAM_KEYS,
-	paramValues: PARAM_VALUES,
-	resultsPerPage: RESULTS_PER_PAGE,
-	reqHourCap: REQ_HOUR_CAP,
+export const ENDPOINTS = {
+	baseURLs: BASE_URLS,
+	params: {
+		keys: PARAM_KEYS,
+		values: PARAM_VALUES,
+	},
 }

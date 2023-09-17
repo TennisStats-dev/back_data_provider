@@ -1,25 +1,42 @@
 import { type countriesCC } from 'constants/countries'
-import type { matchStatusCode, matchRound, gender, ground, gameResult, matchType, bestoOfSets, consistency, playerOption, hours } from 'constants/data'
+import type {
+	matchStatus,
+	matchRound,
+	hours,
+	genderArray,
+	groundArray,
+	gameResultArray,
+	menCircuitArray,
+	womenCircuitArray,
+	typeArray,
+	bestOfSets,
+	consistencyArray,
+	playerOptionArray,
+} from 'constants/data'
 
 export type CountriesCC = (typeof countriesCC)[number]
 
-export type Status = (typeof matchStatusCode)[number]
+export type Status = (typeof matchStatus)[number]
 
 export type Round = (typeof matchRound)[number]
 
-export type Gender = (typeof gender)[number]
+export type Gender = (typeof genderArray)[number]
 
-export type Ground = (typeof ground)[number]
+export type Ground = (typeof groundArray)[number]
 
-export type GameResult = (typeof gameResult)[number]
+export type GameResult = (typeof gameResultArray)[number]
 
-export type MatchType = (typeof matchType)[number]
+export type MenCircuit = (typeof menCircuitArray)[number]
 
-export type BestOfSets = (typeof bestoOfSets)[number]
+export type WomenCircuit = (typeof womenCircuitArray)[number]
 
-export type Consistency = (typeof consistency)[number]
+export type Type = (typeof typeArray)[number]
 
-export type PlayerOption = (typeof playerOption)[number]
+export type BestOfSets = (typeof bestOfSets)[number]
+
+export type Consistency = (typeof consistencyArray)[number]
+
+export type PlayerOption = (typeof playerOptionArray)[number]
 
 export type Hours = (typeof hours)[number]
 
@@ -27,9 +44,8 @@ export interface IPlayer {
 	api_id: number
 	name: string
 	gender: Gender
-	birth?: Date 
-	cc?: CountriesCC
-	image_id?: string
+	birth?: Date
+	cc?: string
 }
 
 export interface ITeam {
@@ -41,10 +57,12 @@ export interface ITeam {
 export interface ITournament {
 	api_id: number
 	name: string
+	circuit: string
+	type: Type
 	best_of_sets: BestOfSets
 	ground: Ground
-	city: string
-	cc?: CountriesCC
+	city?: string
+	cc?: string
 }
 
 export interface ICourt {
@@ -89,7 +107,6 @@ export interface IPreMatch {
 	api_id: number
 	bet365_id: number
 	sport_id: number
-	type: MatchType
 	round: Round
 	tournament: ITournament
 	court: ICourt

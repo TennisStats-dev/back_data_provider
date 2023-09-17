@@ -1001,6 +1001,6 @@ export const countries = [
 	},
 ] as const
 
-export const countriesCC = [...countries.map(country => country.cc)] as const
+export const countriesCC = [...countries.map(country => country.cc)]
 
 export const countriesCCArray = countriesCC as string[]

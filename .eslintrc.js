@@ -17,5 +17,6 @@ module.exports = {
     "rules": {
         "@typescript-eslint/indent": "off",
         "@typescript-eslint/naming-convention": "off",
+        "@typescript-eslint/no-misused-promises": "off",
     }
 }
