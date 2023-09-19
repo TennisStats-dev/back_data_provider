@@ -19,12 +19,14 @@ export const getMatchStatus = (statusInput: number, api_id: number): Status => {
 	}
 }
 
-export const getMatchRound = (roundInput: number, api_id: number): IPreMatch['round'] => {
+export const getMatchRound = (roundInput: string | undefined, api_id: number): IPreMatch['round'] => {
 	if (roundInput === undefined) {
 		return 'unknown'
 	}
 
-	const round = matchRound[roundInput]
+	console.log("se llega a la seiguiente parte ------------")
+
+	const round = matchRound[Number(roundInput)]
 
 	if (round === undefined) {
 		logger.warn(`It was not possible to identify match ROUND for match with id: ${api_id}`)
@@ -81,7 +83,7 @@ export const createNewPreMatchObject = (
 	est_time: Date,
 	pre_odds: IPreOdds | null
 ): IPreMatch => {
-	const round = getMatchRound(Number(roundInput), api_id)
+	const round = getMatchRound(roundInput, api_id)
 	const status = getMatchStatus(Number(statusInput), api_id)
 
 	const matchData: IPreMatch = {
