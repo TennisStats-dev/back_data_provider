@@ -4,7 +4,7 @@
 //
 //   const eventOdds = Convert.toEventOdds(json);
 
-export interface EventOdds {
+export interface EventOddsRes {
 	success: number
 	results: EventOdds
 }
@@ -12,8 +12,7 @@ export interface EventOdds {
 export interface EventOdds {
 	stats: Stats
 	odds: {
-		13_1?: Odd[]
-		13_4?: Odd[]
+		[key: string]: Odd[]
 	}
 }
 
@@ -26,8 +25,8 @@ export interface Odd {
 }
 
 export interface Stats {
-	matching_dir?: number
-	odds_update?: OddsUpdate
+	matching_dir: number
+	odds_update: OddsUpdate
 }
 
 export interface OddsUpdate {

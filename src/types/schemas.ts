@@ -73,6 +73,7 @@ interface IMatchStats {
 	df: [number, number]
 	win_1st_serve: [number, number]
 	bp: [number, number]
+	consistency: Consistency
 }
 
 interface IPbP {
@@ -86,7 +87,6 @@ interface IPbP {
 
 interface IGameStats {
 	summary: string
-	consistency: Consistency
 	service: PlayerOption
 	winner: PlayerOption
 	won_points?: [number, number]
@@ -100,6 +100,19 @@ interface ISetStats {
 	games_stats: IGameStats[]
 }
 
+export interface IPreOdds {
+	last: {
+		win: [number, number]
+		win_1st_set?: [number, number]
+		update: Date
+	}
+	first: {
+		win: [number, number]
+		win_1st_set?: [number, number]
+		time: Date
+	}
+}
+
 export interface IPreMatch {
 	api_id: number
 	bet365_id?: number
@@ -111,6 +124,7 @@ export interface IPreMatch {
 	p2: IPlayer | ITeam
 	status: Status
 	est_time: Date
+	pre_odds?: IPreOdds
 }
 
 export interface IMatch extends IPreMatch {

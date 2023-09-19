@@ -11,6 +11,6 @@ const teamSchema = new Schema<ITeam>(
 )
 
 const Team = model<ITeam>('Team', teamSchema)
-const TempTeam = model<ITeam>('TempTeam', teamSchema)
 
-export {Team, TempTeam}
+
+export {Team}

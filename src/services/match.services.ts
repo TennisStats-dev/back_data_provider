@@ -1,6 +1,8 @@
+import config from '@config/index'
 import logger from '@config/logger'
+import type { EventOdds } from 'API/types/eventOdds'
 import { matchRound, matchStatus } from 'constants/data'
-import type { ICourt, IPlayer, IPreMatch, ITeam, ITournament, Status } from 'types/schemas'
+import type { ICourt, IPlayer, IPreMatch, IPreOdds, ITeam, ITournament, Status } from 'types/schemas'
 
 export const checkIfIsTennisMatch = (sportId: number): boolean => {
 	return sportId === 13
@@ -18,7 +20,6 @@ export const getMatchStatus = (statusInput: number, api_id: number): Status => {
 }
 
 export const getMatchRound = (roundInput: number, api_id: number): IPreMatch['round'] => {
-	
 	if (roundInput === undefined) {
 		return 'unknown'
 	}
@@ -33,6 +34,40 @@ export const getMatchRound = (roundInput: number, api_id: number): IPreMatch['ro
 	}
 }
 
+export const getMatchPreOdds = (eventOddsInput: EventOdds): IPreOdds | null => {
+	if (eventOddsInput.stats.matching_dir !== undefined) {
+		const WinnerObject = eventOddsInput.odds[config.api.constants.oddsMarketsRef.winner]
+
+		const firstSetWinnerObject = eventOddsInput.odds[config.api.constants.oddsMarketsRef.firstSetWinner]
+
+		const preMatchOddsObject: IPreOdds = {
+			first: {
+				win: [Number(WinnerObject.at(-1)?.home_od), Number(WinnerObject.at(-1)?.away_od)],
+				time: new Date(Number(WinnerObject[WinnerObject.length - 1].add_time) * 1000),
+			},
+			last: {
+				win: [Number(WinnerObject[0].home_od), Number(WinnerObject[0].away_od)],
+				update: new Date(Number(eventOddsInput.stats.odds_update['13_1']) * 1000),
+			},
+		}
+
+		if (eventOddsInput.odds[config.api.constants.oddsMarketsRef.firstSetWinner].length > 0) {
+			preMatchOddsObject.first.win_1st_set = [
+				Number(firstSetWinnerObject.at(-1)?.home_od),
+				Number(firstSetWinnerObject.at(-1)?.away_od),
+			]
+
+			preMatchOddsObject.last.win_1st_set = [
+				Number(firstSetWinnerObject[0].home_od),
+				Number(firstSetWinnerObject[0].away_od),
+			]
+		}
+
+		return preMatchOddsObject
+	}
+	return null
+}
+
 export const createNewPreMatchObject = (
 	api_id: number,
 	bet365_id: number,
@@ -44,6 +79,7 @@ export const createNewPreMatchObject = (
 	p2: IPlayer | ITeam,
 	statusInput: string,
 	est_time: Date,
+	pre_odds: IPreOdds | null
 ): IPreMatch => {
 	const round = getMatchRound(Number(roundInput), api_id)
 	const status = getMatchStatus(Number(statusInput), api_id)
@@ -65,6 +101,10 @@ export const createNewPreMatchObject = (
 
 	if (court !== null) {
 		matchData.court = court
+	}
+
+	if (pre_odds !== null) {
+		matchData.pre_odds = pre_odds
 	}
 
 	return matchData

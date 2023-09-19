@@ -1,8 +1,8 @@
 import Court from '@database/models/court.model'
-import { Player, TempPlayer } from '@database/models/player.model'
+import { Player } from '@database/models/player.model'
 import PreMatch from '@database/models/preMatch.model'
 import RequestsInfo from '@database/models/requestsInfo.model'
-import { Team, TempTeam } from '@database/models/team.model'
+import { Team } from '@database/models/team.model'
 import Tournament from '@database/models/tournament.model'
 import type { Document } from 'mongoose'
 import type { ICourt, IPlayer, IPreMatch, IRequestsInfo, ITeam, ITournament } from 'types/schemas'
@@ -25,11 +25,8 @@ const getPlayer = async (api_id: number): Promise<IPlayer & Document | null> => 
 		const existingPlayer = await Player.findOne({
 			api_id,
 		})
-		const existingTempPlayer = await TempPlayer.findOne({
-			api_id,
-		})
 
-		return existingPlayer ?? existingTempPlayer
+		return existingPlayer
 	} catch (err) {
 		throw createError(err, 'get player', { api_id, collection: 'player' })
 	}
@@ -39,7 +36,9 @@ const getPreMatch = async (api_id: number): Promise<IPreMatch & Document | null>
 	try {
 		const existingPreMatch = await PreMatch.findOne({
 			api_id,
-		})
+		}).populate('p1')
+		
+		// .populate('tournament').populate('court').populate('p1').populate('p2')
 
 		return existingPreMatch
 	} catch (err) {
@@ -52,11 +51,8 @@ const getTeam = async (api_id: number): Promise<ITeam & Document | null> => {
 		const existingTeam = await Team.findOne({
 			api_id,
 		})
-		const existingTempTeam = await TempTeam.findOne({
-			api_id,
-		})
 
-		return existingTeam ?? existingTempTeam
+		return existingTeam
 	} catch (err) {
 		throw createError(err, 'get team', { api_id, collection: 'team' })
 	}

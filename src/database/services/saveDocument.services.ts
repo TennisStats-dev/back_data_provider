@@ -1,9 +1,9 @@
 import logger from '@config/logger'
 import Court from '@database/models/court.model'
-import { TempPlayer } from '@database/models/player.model'
+import { Player } from '@database/models/player.model'
 import PreMatch from '@database/models/preMatch.model'
 import RequestsInfo from '@database/models/requestsInfo.model'
-import { TempTeam } from '@database/models/team.model'
+import { Team } from '@database/models/team.model'
 import Tournament from '@database/models/tournament.model'
 import { hours } from 'constants/data'
 import type { Document } from 'mongoose'
@@ -22,27 +22,27 @@ const saveNewCourt = async (courtData: ICourt): Promise<ICourt & Document> => {
 	}
 }
 
-const saveNewTempPlayer = async (playerData: IPlayer): Promise<IPlayer & Document> => {
+const saveNewPlayer = async (playerData: IPlayer): Promise<IPlayer & Document> => {
 	try {
-		const newTempPlayer = new TempPlayer(playerData)
-		const savedTempPlayer = await newTempPlayer.save()
+		const newPlayer = new Player(playerData)
+		const savedPlayer = await newPlayer.save()
 
-		logger.info(`New temporal player saved - NAME: ${savedTempPlayer.name} - ID: ${savedTempPlayer.api_id}`)
-		return savedTempPlayer
+		logger.info(`New player saved - NAME: ${savedPlayer.name} - ID: ${savedPlayer.api_id}`)
+		return savedPlayer
 	} catch (err) {
-		throw createError(err, 'save new tempPlayer', { api_id: playerData.api_id, collection: 'tempPlayer' })
+		throw createError(err, 'save new player', { api_id: playerData.api_id, collection: 'Player' })
 	}
 }
 
-const saveNewTempTeam = async (teamData: any): Promise<ITeam & Document> => {
+const saveNewTeam = async (teamData: any): Promise<ITeam & Document> => {
 	try {
-		const newTempTeam = new TempTeam(teamData)
-		const savedTempTeam = await newTempTeam.save()
-		logger.info(`New temporal team saved - ID: ${savedTempTeam.api_id}`)
+		const newTeam = new Team(teamData)
+		const savedTeam = await newTeam.save()
+		logger.info(`New temporal team saved - ID: ${savedTeam.api_id}`)
 
-		return savedTempTeam
+		return savedTeam
 	} catch (err) {
-		throw createError(err, 'save new tempTeam', { api_id: teamData.api_id, collection: 'tempTeam' })
+		throw createError(err, 'save new Team', { api_id: teamData.api_id, collection: 'Team' })
 	}
 }
 
@@ -98,8 +98,8 @@ const saveNewRequestInfo = async (formattedDate: string): Promise<IRequestsInfo 
 const SAVE = {
 	saveNewCourt,
 	saveNewRequestInfo,
-	saveNewTempPlayer,
-	saveNewTempTeam,
+	saveNewPlayer,
+	saveNewTeam,
 	saveNewTournament,
 	saveNewPreMatch
 }

@@ -3,6 +3,7 @@ import axios from 'axios'
 import type { MatchView, MatchViewRes } from 'API/types/MatchView'
 import type { TeamMembers, TeamMembersRes } from 'API/types/teamMembers'
 import type { UpcomingMatchesRes } from 'API/types/upcomingMatches'
+import type { EventOdds, EventOddsRes } from './types/eventOdds'
 import { createError } from 'utils/createError'
 
 const getUpcomingMatches = async (page: number = 1): Promise<UpcomingMatchesRes> => {
@@ -15,7 +16,7 @@ const getUpcomingMatches = async (page: number = 1): Promise<UpcomingMatchesRes>
 			},
 		})
 		const upcomingMatches: UpcomingMatchesRes = res.data
-	
+
 		return upcomingMatches
 	} catch (err) {
 		throw createError(err, 'get upcoming matches')
@@ -48,42 +49,39 @@ const getTeamMembers = async (teamApiId: number): Promise<TeamMembers[]> => {
 				[config.api.endpoints.params.keys.team_id]: teamApiId,
 			},
 		})
-	
-		const data: TeamMembersRes = res.data
-	
-		const teamMember: TeamMembers[] = data.results
-	
-		return teamMember
 
+		const data: TeamMembersRes = res.data
+
+		const teamMember: TeamMembers[] = data.results
+
+		return teamMember
 	} catch (err) {
 		throw createError(err, 'get team members')
-
 	}
 }
 
-// const getMatchOdds = async (teamApiId: number): Promise<TeamMembers[]> => {
-// 	try {
-// 		const res = await axios.get(`${config.api.endpoints.baseURLs.teamMembers}`, {
-// 			params: {
-// 				[config.api.endpoints.params.keys.token]: config.api.endpoints.params.values.token,
-// 				[config.api.endpoints.params.keys.team_id]: teamApiId,
-// 			},
-// 		})
-	
-// 		const data: TeamMembersRes = res.data
-	
-// 		const teamMember: TeamMembers[] = data.results
-	
-// 		return teamMember
+const getMatchOdds = async (api_id: number): Promise<EventOdds> => {
+	try {
+		const res = await axios.get(`${config.api.endpoints.baseURLs.matchOdds}`, {
+			params: {
+				[config.api.endpoints.params.keys.token]: config.api.endpoints.params.values.token,
+				[config.api.endpoints.params.keys.event_id]: api_id,
+			},
+		})
 
-// 	} catch (err) {
-// 		throw createError(err, 'get team members')
+		const data: EventOddsRes = res.data
 
-// 	}
-// }
+		const matchOdds: EventOdds = data.results
+
+		return matchOdds
+	} catch (err) {
+		throw createError(err, 'get team members')
+	}
+}
 
 export const SERVICES = {
 	getUpcomingMatches,
 	getEventView,
 	getTeamMembers,
+	getMatchOdds
 }

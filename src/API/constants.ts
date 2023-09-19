@@ -32,6 +32,11 @@ const MATCH_ROUND = {
 	54: 54
 }
 
+const ODDS_MARKET = {
+	winner: "13_1",
+	firstSetWinner: "13_4",
+}
+
 const BEST_OF_SETS = {
 	3: '3',
 	5: '5',
@@ -65,5 +70,6 @@ export const CONSTANTS = {
 	bestOfSets: BEST_OF_SETS,
 	players: PLAYERS,
 	ground: GROUND,
-	circuit: CIRCUIT
+	circuit: CIRCUIT,
+	oddsMarketsRef: ODDS_MARKET
 }

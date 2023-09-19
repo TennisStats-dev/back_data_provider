@@ -13,6 +13,18 @@ const preMatchSchema = new Schema<IPreMatch>(
 		p2: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
 		status: { type: Number, required: true },
 		est_time: { type: Date, required: true },
+		pre_odds: {
+			first: {
+				win: { type: [Number, Number], default: undefined },
+				win_1st_set: { type: [Number, Number], default: undefined  },
+				time: { type: Date}
+			},
+			last: {
+				win: { type: [Number, Number], default: undefined  },
+				win_1st_set: { type: [Number, Number], default: undefined  },
+				update: { type: Date}
+			},
+		},
 	},
 	{ timestamps: true },
 )

@@ -6,7 +6,7 @@ import config from '@config/index'
 import express from 'express'
 import logger from '@config/logger'
 import { saveUpcomingMatches } from '@controllers/matchControllers'
-// import { saveNewCourtOnDB } from '@database/services/court.services'
+import { getMatchDetails } from 'test'
 
 export const app = express()
 app.use(express.json())
@@ -18,26 +18,13 @@ app.get('/ping', (_, res) => {
 
 app.get('/upcomingmatches', saveUpcomingMatches)
 
+app.get('/eventview/:id', getMatchDetails)
+
 config.database.connection.connectDB()
 
 app.listen(config.server.port, () => {
 	logger.info(`Server running on port ${config.server.port}`)
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // config.database.services.savers.saveNewTournament({api_id: 5, name: 'ITF dgsas', circuit: 'ITF', type: 'M'})
 // .then(res => {console.log(res)})
@@ -50,15 +37,6 @@ app.listen(config.server.port, () => {
 // config.database.services.getters.getTournament(5)
 // .then(res => {console.log(res)})
 // .catch(err => {console.log(err)})
-
-
-
-
-
-
-
-
-
 
 // const prueba = async (_req: Request, _res: Response): Promise<void> => {
 // 	const players: IPlayer[] = []
