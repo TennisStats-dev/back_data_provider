@@ -1,11 +1,11 @@
 import config from '@config/index'
 import type { Gender, IPlayer } from 'types/schemas'
-import { checkArrayIncludesSubstring } from 'utils/checkArrayIncludesSubstring'
+import { checkIfArrayIncludesSubstring } from 'utils/checkArrayIncludesSubstring'
 import { countriesCCArray } from 'constants/countries'
 import logger from '@config/logger'
 
 export const checkIfIsPlayer = (playerName: string): boolean => {
-	return !checkArrayIncludesSubstring(config.api.formats.Team, playerName)
+	return !checkIfArrayIncludesSubstring(config.api.formats.Team, playerName)
 }
 
 export const createNewPlayerObject = (

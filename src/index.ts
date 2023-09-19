@@ -5,6 +5,7 @@ import 'dotenv/config'
 import config from '@config/index'
 import express from 'express'
 import logger from '@config/logger'
+import { saveUpcomingMatches } from '@controllers/matchControllers'
 
 // import { saveNewCourtOnDB } from '@database/services/court.services'
 
@@ -16,11 +17,34 @@ app.get('/ping', (_, res) => {
 	res.send('pong')
 })
 
+app.get('/upcomingmatches', saveUpcomingMatches)
+
 config.database.connection.connectDB()
 
 app.listen(config.server.port, () => {
 	logger.info(`Server running on port ${config.server.port}`)
 })
+
+// config.database.services.savers.saveNewTournament({api_id: 5, name: 'ITF dgsas', circuit: 'ITF', type: 'M'})
+// .then(res => {console.log(res)})
+// .catch(err => {console.log(err)})
+
+// config.database.services.getters.getTournament(65451)
+// .then(res => {console.log(res)})
+// .catch(err => {console.log(err)})
+
+// config.database.services.getters.getTournament(5)
+// .then(res => {console.log(res)})
+// .catch(err => {console.log(err)})
+
+
+
+
+
+
+
+
+
 
 // const prueba = async (_req: Request, _res: Response): Promise<void> => {
 // 	const players: IPlayer[] = []

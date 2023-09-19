@@ -4,8 +4,8 @@ import { Schema, model } from 'mongoose'
 const teamSchema = new Schema<ITeam>(
 	{
 		api_id: { type: Number, required: true, unique: true },
-		team_p1: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
-		team_p2: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
+		team_p1: { type: Schema.Types.ObjectId, ref: 'Player' },
+		team_p2: { type: Schema.Types.ObjectId, ref: 'Player' },
 	},
 	{ timestamps: true },
 )

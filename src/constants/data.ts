@@ -1,8 +1,6 @@
 import { API } from "API"
 
 
-
-
 export const matchRound = {
 
 	[API.constants.matchRounds[14]]: 'QR1',
@@ -78,29 +76,29 @@ export const matchRound = {
 
 
 export const matchStatus = {
-	[API.constants.matchStatus.notStarted]: 0,
-	[API.constants.matchStatus.inplay]: 1,
-	[API.constants.matchStatus.toBeFixed]: 2,
-	[API.constants.matchStatus.ended]: 3,
-	[API.constants.matchStatus.postponed]: 4,
-	[API.constants.matchStatus.cancelled]: 5,
-	[API.constants.matchStatus.walkover]: 6,
-	[API.constants.matchStatus.interrupted]: 7,
-	[API.constants.matchStatus.abandoned]: 8,
-	[API.constants.matchStatus.retired]: 9,
-	[API.constants.matchStatus.suspended]: 10,
-	[API.constants.matchStatus.decidedByFA]: 11,
-	[API.constants.matchStatus.removed]: 99,
+	[API.constants.matchStatus[0]]: 0,
+	[API.constants.matchStatus[1]]: 1,
+	[API.constants.matchStatus[2]]: 2,
+	[API.constants.matchStatus[3]]: 3,
+	[API.constants.matchStatus[4]]: 4,
+	[API.constants.matchStatus[5]]: 5,
+	[API.constants.matchStatus[6]]: 6,
+	[API.constants.matchStatus[7]]: 7,
+	[API.constants.matchStatus[8]]: 8,
+	[API.constants.matchStatus[9]]: 9,
+	[API.constants.matchStatus[10]]: 10,
+	[API.constants.matchStatus[11]]: 11,
+	[API.constants.matchStatus[99]]: 99,
 } as const
 
-export const ground = {
-	hard: 'hard',
-	clay: 'clay',
-	grass: 'grass',
-	indoor: 'indoor',
+export const grounds = {
+	[API.constants.ground.clay.format]: 'clay',
+	[API.constants.ground.grass.format]: 'grass',
+	[API.constants.ground.hard.format]: 'hard',
+	[API.constants.ground.indoor.format]: 'indoor',
 } as const
 
-export const groundArray = Array.from(Object.values(ground))
+export const groundArray = Array.from(Object.values(grounds))
 
 export const gender = {
 	male: 'M',
@@ -125,25 +123,7 @@ export const gameResult = {
 
 export const gameResultArray = Array.from(Object.values(gameResult))
 
-export const menCircuit = {
-	ATP: 'ATP',
-	CH: 'CH',
-	ITF: 'ITF',
-	UTR: 'UTR',
-	DC: 'DC',
-} as const
-
-export const menCircuitArray = Array.from(Object.values(menCircuit))
-
-export const womenCircuit = {
-	WTA: 'ATP',
-	ITF: 'ITF',
-	UTR: 'UTR',
-} as const
-
-export const womenCircuitArray = Array.from(Object.values(womenCircuit))
-
-export const allCircuitsArray = [...womenCircuitArray as string[], ...menCircuitArray as string[]]
+export const circuitArray = API.constants.circuit
 
 export const type = {
 	men: 'M',
@@ -154,6 +134,7 @@ export const type = {
 } as const
 
 export const typeArray = Array.from(Object.values(type))
+
 
 export const bestOfSets = {
 	[API.constants.bestOfSets[3]]: 3,

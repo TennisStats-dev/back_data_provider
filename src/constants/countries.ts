@@ -1,4 +1,4 @@
-export const countries = [
+export const countriesArray = [
 	{
 		cc: 'ad',
 		name: 'Andorra',
@@ -1001,6 +1001,6 @@ export const countries = [
 	},
 ] as const
 
-export const countriesCC = [...countries.map(country => country.cc)]
+export const countriesCC = [...countriesArray.map(country => country.cc)]
 
 export const countriesCCArray = countriesCC as string[]

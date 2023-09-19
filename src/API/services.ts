@@ -26,7 +26,7 @@ const getEventView = async (api_id: number): Promise<MatchView> => {
 	try {
 		const res = await axios.get(`${config.api.endpoints.baseURLs.matchView}`, {
 			params: {
-				[config.api.endpoints.params.keys.token]: 'vfdhbdfs',
+				[config.api.endpoints.params.keys.token]: config.api.endpoints.params.values.token,
 				[config.api.endpoints.params.keys.event_id]: api_id,
 			},
 		})

@@ -6,12 +6,11 @@ import type {
 	genderArray,
 	groundArray,
 	gameResultArray,
-	menCircuitArray,
-	womenCircuitArray,
 	typeArray,
 	bestOfSets,
 	consistencyArray,
 	playerOptionArray,
+	circuitArray,
 } from 'constants/data'
 
 export type CountriesCC = (typeof countriesCC)[number]
@@ -26,9 +25,7 @@ export type Ground = (typeof groundArray)[number]
 
 export type GameResult = (typeof gameResultArray)[number]
 
-export type MenCircuit = (typeof menCircuitArray)[number]
-
-export type WomenCircuit = (typeof womenCircuitArray)[number]
+export type Circuit = (typeof circuitArray)[number]
 
 export type Type = (typeof typeArray)[number]
 
@@ -50,17 +47,17 @@ export interface IPlayer {
 
 export interface ITeam {
 	api_id: number
-	team_p1: IPlayer
-	team_p2: IPlayer
+	team_p1?: IPlayer
+	team_p2?: IPlayer
 }
 
 export interface ITournament {
 	api_id: number
 	name: string
-	circuit: string
+	circuit: Circuit | 'unknown'
 	type: Type
-	best_of_sets: BestOfSets
-	ground: Ground
+	best_of_sets?: BestOfSets
+	ground?: Ground
 	city?: string
 	cc?: string
 }
@@ -105,11 +102,11 @@ interface ISetStats {
 
 export interface IPreMatch {
 	api_id: number
-	bet365_id: number
+	bet365_id?: number
 	sport_id: number
-	round: Round
+	round: Round | 'unknown'
 	tournament: ITournament
-	court: ICourt
+	court?: ICourt
 	p1: IPlayer | ITeam
 	p2: IPlayer | ITeam
 	status: Status

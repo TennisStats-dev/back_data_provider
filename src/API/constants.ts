@@ -1,17 +1,19 @@
+
+
 const MATCH_STATUS = {
-	notStarted: 0,
-	inplay: 1,
-	toBeFixed: 2,
-	ended: 3,
-	postponed: 4,
-	cancelled: 5,
-	walkover: 6,
-	interrupted: 7,
-	abandoned: 8,
-	retired: 9,
-	suspended: 10,
-	decidedByFA: 11,
-	removed: 99,
+	0: 0, // notStarted
+	1: 1, // inplay
+	2 : 2, // toBeFixed
+	3 : 3, // ended
+	4 : 4, // postponed
+	5 : 5, // cancelled
+	6 : 6, // walkover
+	7 : 7, // interrupted
+	8 : 8, // abandoned
+	9 : 9, // retired
+	10 : 10, // suspended
+	11 : 11, // decidedByFA
+	99 : 99, // removed
 }
 
 const MATCH_ROUND = {
@@ -27,6 +29,7 @@ const MATCH_ROUND = {
 	27: 'QF',
 	28: 'SF',
 	29: 'F',
+	54: 'Q'
 }
 
 const BEST_OF_SETS = {
@@ -39,9 +42,28 @@ const PLAYERS = {
 	p2: 'p2',
 }
 
+const GROUND = {
+	clay: {
+		format: 'Clay',
+	},
+	grass: {
+		format: 'Grass',
+	},
+	hard: {
+		format: 'Hardcourt outdoor',
+	},
+	indoor: {
+		format: 'Hardcourt indoor',
+	},
+}
+
+const CIRCUIT = ['ATP', 'WTA', 'ITF', 'Challenger', 'UTR', 'Davis Cup'] as const
+
 export const CONSTANTS = {
 	matchStatus: MATCH_STATUS,
 	matchRounds: MATCH_ROUND,
 	bestOfSets: BEST_OF_SETS,
 	players: PLAYERS,
+	ground: GROUND,
+	circuit: CIRCUIT
 }

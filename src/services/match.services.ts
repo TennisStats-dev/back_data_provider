@@ -1,50 +1,68 @@
-import type { Gender, Type } from 'types/schemas'
-import { checkIfIsTeam } from './team.services'
-import { checkIfIsDoubles, checkIfIsMen, checkIfIsMixedType, checkIfIsWomen } from './tournament.services'
 import logger from '@config/logger'
-import { gender, type } from 'constants/data'
-
-export const getMatchType = (p1Name: string, p2Name: string, tournamentName: string, tournamentId: number): {gender: Gender, type: Type} => {
-	if (checkIfIsMixedType(tournamentName)) {
-		return {
-            gender: gender.male,
-            type: type.davisCup
-        }
-	}
-
-	const isDoubles = checkIfIsDoubles(tournamentName) || (checkIfIsTeam(p1Name) && checkIfIsTeam(p2Name))
-
-	const isWomen = checkIfIsWomen(tournamentName)
-
-	const isMen = checkIfIsMen(tournamentName)
-
-	if (!isWomen && !isMen) {
-		logger.warn(`It's not possible to recognize GENDER for TOURNAMENT: ${tournamentName} with ID: ${tournamentId}`)
-	}
-
-	if (isDoubles && isWomen) {
-		return {
-            gender: gender.female,
-            type: type.womenDoubles,
-        }
-	} else if (isDoubles && !isWomen) {
-		return {
-            gender: gender.male,
-            type: type.menDoubles,
-        }
-	} else if (!isDoubles && isWomen) {
-		return {
-            gender: gender.female,
-            type: type.women,
-        }
-	} else {
-		return {
-            gender: gender.male,
-            type: type.men,
-        }
-	}
-}
+import { matchRound, matchStatus } from 'constants/data'
+import type { ICourt, IPlayer, IPreMatch, ITeam, ITournament, Status } from 'types/schemas'
 
 export const checkIfIsTennisMatch = (sportId: number): boolean => {
 	return sportId === 13
+}
+
+export const getMatchStatus = (statusInput: number, api_id: number): Status => {
+	const status = matchStatus[statusInput]
+
+	if (status === undefined) {
+		logger.warn(`It was not possible to identify match STATUS for match with id: ${api_id}`)
+		return matchStatus[0]
+	} else {
+		return status
+	}
+}
+
+export const getMatchRound = (roundInput: number, api_id: number): IPreMatch['round'] => {
+	const round = matchRound[roundInput]
+
+	console.log(round)
+
+	if (round === undefined) {
+		logger.warn(`It was not possible to identify match ROUND for match with id: ${api_id}`)
+		return 'unknown'
+	} else {
+		return round
+	}
+}
+
+export const createNewPreMatchObject = (
+	api_id: number,
+	bet365_id: number,
+	sport_id: number,
+	roundInput: string | undefined,
+	tournament: ITournament,
+	court: ICourt | null,
+	p1: IPlayer | ITeam,
+	p2: IPlayer | ITeam,
+	statusInput: string,
+	est_time: Date,
+): IPreMatch => {
+	const round = getMatchRound(Number(roundInput), api_id)
+	const status = getMatchStatus(Number(statusInput), api_id)
+
+	const matchData: IPreMatch = {
+		api_id,
+		sport_id,
+		round,
+		tournament,
+		p1,
+		p2,
+		status,
+		est_time,
+	}
+
+	if (!isNaN(bet365_id) && bet365_id !== null) {
+		matchData.bet365_id = bet365_id
+	}
+
+	if (court !== null) {
+		matchData.court = court
+	}
+
+	return matchData
 }

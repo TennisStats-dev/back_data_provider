@@ -11,7 +11,7 @@ import {
 const MatchSchema = new Schema<IMatch>(
 	{
 		api_id: { type: Number, required: true, unique: true },
-		bet365_id: { type: Number, required: true, unique: true },
+		bet365_id: { type: Number, unique: true },
 		sport_id: { type: Number, required: true },
 		round: { type: String, enum: Object.values(matchRound), required: true },
 		tournament: {

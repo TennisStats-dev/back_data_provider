@@ -1,12 +1,7 @@
-
-export const checkArrayIncludesSubstring = (formatsArray: string[], string: string): boolean => {
-    let result = false
-    
-    formatsArray.forEach(format => {
-        if (string.includes(format)) {
-            result = true
-        }
+export const checkIfArrayIncludesSubstring = (formatsArray: string[], stringToCheck: string): boolean => {
+    return formatsArray.some(format => {
+        return stringToCheck.includes(format)
     })
-    
-    return result
 }
+
+

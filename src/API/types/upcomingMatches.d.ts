@@ -30,6 +30,7 @@ export interface UpcomingMatches {
 	ss: null | string
 	bet365_id: string
 	o_home?: Away
+	round?: string
 }
 
 export interface Away {

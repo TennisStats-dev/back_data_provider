@@ -1,12 +1,13 @@
 import logger from '@config/logger'
 import Court from '@database/models/court.model'
 import { TempPlayer } from '@database/models/player.model'
+import PreMatch from '@database/models/preMatch.model'
 import RequestsInfo from '@database/models/requestsInfo.model'
 import { TempTeam } from '@database/models/team.model'
 import Tournament from '@database/models/tournament.model'
 import { hours } from 'constants/data'
 import type { Document } from 'mongoose'
-import type { ICourt, IPlayer, IRequestsInfo, ITeam, ITournament } from 'types/schemas'
+import type { ICourt, IPlayer, IPreMatch, IRequestsInfo, ITeam, ITournament } from 'types/schemas'
 import { createError } from 'utils/createError'
 
 const saveNewCourt = async (courtData: ICourt): Promise<ICourt & Document> => {
@@ -53,15 +54,28 @@ const saveNewTournament = async (tournamentData: ITournament): Promise<ITourname
 		logger.info(`New tournament saved - NAME: ${savedTournament.name} - ID: ${savedTournament.api_id}`)
 
 		return savedTournament
-	} catch (err) {
+	} catch (err: any) {
 		throw createError(err, 'save new tournament', { api_id: tournamentData.api_id, collection: 'tournament' })
+	}
+}
+
+const saveNewPreMatch = async (matchData: IPreMatch): Promise<IPreMatch & Document> => {
+	try {
+		const newPreMatch = new PreMatch(matchData)
+
+		const savedPreMatch = await newPreMatch.save()
+
+		logger.info(
+			`New pre match saved - ID: ${savedPreMatch.api_id} - P1: ${matchData.p1.api_id} - - P2: ${matchData.p2.api_id}`,
+		)
+		return savedPreMatch
+	} catch (err) {
+		throw createError(err, 'save new preMatch', { api_id: matchData.api_id, collection: 'preMatch' })
 	}
 }
 
 const saveNewRequestInfo = async (formattedDate: string): Promise<IRequestsInfo & Document> => {
 	try {
-
-
 		const requestInfoData: IRequestsInfo = {
 			date: formattedDate,
 			hour: hours.map((hour) => {
@@ -87,6 +101,7 @@ const SAVE = {
 	saveNewTempPlayer,
 	saveNewTempTeam,
 	saveNewTournament,
+	saveNewPreMatch
 }
 
 export default SAVE
