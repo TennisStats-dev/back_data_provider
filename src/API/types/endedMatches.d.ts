@@ -29,7 +29,10 @@ export interface EndedMatches {
 	away: Away
 	ss: null | string
 	round: string
-	scores?: { [key: string]: Score }
+	scores?: {
+		1: Score
+		2: Score
+	}
 	o_away?: Away
 	o_home?: Away
 }

@@ -61,6 +61,27 @@ const getTeamMembers = async (teamApiId: number): Promise<TeamMembers[]> => {
 	}
 }
 
+// const getMatchOdds = async (teamApiId: number): Promise<TeamMembers[]> => {
+// 	try {
+// 		const res = await axios.get(`${config.api.endpoints.baseURLs.teamMembers}`, {
+// 			params: {
+// 				[config.api.endpoints.params.keys.token]: config.api.endpoints.params.values.token,
+// 				[config.api.endpoints.params.keys.team_id]: teamApiId,
+// 			},
+// 		})
+	
+// 		const data: TeamMembersRes = res.data
+	
+// 		const teamMember: TeamMembers[] = data.results
+	
+// 		return teamMember
+
+// 	} catch (err) {
+// 		throw createError(err, 'get team members')
+
+// 	}
+// }
+
 export const SERVICES = {
 	getUpcomingMatches,
 	getEventView,

@@ -6,7 +6,7 @@
 //
 // These functions will throw an error if the JSON doesn't
 // match the expected interface, even if the JSON is valid.
-/* eslint-disable */
+
 export interface MatchViewRes {
 	success: number
 	results: MatchView[]
@@ -23,7 +23,10 @@ export interface MatchView {
 	ss: string
 	stats: Stats
 	events: Event[]
-	scores: { [key: string]: Score }
+	scores: {
+		1: Score
+		2: Score
+	}
 	extra: Extra
 	inplay_created_at: string
 	inplay_updated_at: string

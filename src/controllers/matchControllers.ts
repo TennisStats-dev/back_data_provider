@@ -1,12 +1,12 @@
-import { createNewPreMatchObject } from 'services/match.services'
+import logger from '@config/logger'
 import type { Request, Response } from 'express'
 import { type UpcomingMatches } from 'API/types/upcomingMatches'
-import { gender, type } from 'constants/data'
 import config from '@config/index'
+import { gender, type } from 'constants/data'
+import type { ICourt, IPlayer, IPreMatch, ITeam, ITournament } from 'types/schemas'
+import { createNewPreMatchObject } from 'services/match.services'
 import { createNewPlayerObject } from 'services/player.services'
-import type { ICourt, IPlayer, ITeam, ITournament } from 'types/schemas'
 import { createNewCourtObject } from 'services/court.services'
-import logger from '@config/logger'
 import { createNewCompletTournamentObject, createNewIncompletTournamentObject } from 'services/tournament.services'
 import { createNewTeamObject } from 'services/team.services'
 
@@ -25,8 +25,9 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
 			console.log('upcoming matches es', allUpcomingMatches.length)
 		} while (allUpcomingMatches.length < upcomingMatchesApiResponse.pager.total)
 
-        
+        const newMatchesSaved: IPreMatch[] = []
 
+        
 		for (const match of allUpcomingMatches) {
 
             console.log('se itera un nuevo partido!!')
@@ -226,18 +227,19 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
 
             console.log('el partido a guardar es: ', preMatchObject)
 
-            await config.database.services.savers.saveNewPreMatch(preMatchObject)
+            const savedPreMatch = await config.database.services.savers.saveNewPreMatch(preMatchObject)
 
+
+            newMatchesSaved.push(savedPreMatch)
             console.log('partido guardado correctamente')
         } else {
             logger.error(
                 'There was an error trying to create a new pre match object due to problems with assignation of the players (promises not resolved on time)',
             )
-        }
-		// allUpcomingMatches.map(async match => {	
+            }
     }
-        // })
-
+    
+    console.log(newMatchesSaved)
 
 	} catch (err) {
 		logger.error(err)

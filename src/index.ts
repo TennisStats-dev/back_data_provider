@@ -6,7 +6,6 @@ import config from '@config/index'
 import express from 'express'
 import logger from '@config/logger'
 import { saveUpcomingMatches } from '@controllers/matchControllers'
-
 // import { saveNewCourtOnDB } from '@database/services/court.services'
 
 export const app = express()
@@ -24,6 +23,21 @@ config.database.connection.connectDB()
 app.listen(config.server.port, () => {
 	logger.info(`Server running on port ${config.server.port}`)
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // config.database.services.savers.saveNewTournament({api_id: 5, name: 'ITF dgsas', circuit: 'ITF', type: 'M'})
 // .then(res => {console.log(res)})

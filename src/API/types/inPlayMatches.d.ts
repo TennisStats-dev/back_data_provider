@@ -29,7 +29,10 @@ export interface InPlayMatches {
 	ss: string
 	points: string
 	playing_indicator: PlayingIndicator
-	scores: { [key: string]: Score }
+	scores: {
+		1: Score
+		2: Score
+	}
 	bet365_id: string
 	o_home?: Away
 	o_away?: Away

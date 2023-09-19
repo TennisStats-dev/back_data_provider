@@ -2,7 +2,6 @@ import { API } from "API"
 
 
 export const matchRound = {
-
 	[API.constants.matchRounds[14]]: 'QR1',
 	[API.constants.matchRounds[15]]: 'QR2',
 	[API.constants.matchRounds[16]]: 'QR3',
@@ -16,6 +15,22 @@ export const matchRound = {
 	[API.constants.matchRounds[28]]: 'SF',
 	[API.constants.matchRounds[29]]: 'F',
 } as const
+
+export const matchRound2 = {
+	14: 'QR1',
+	15: 'QR2',
+	16: 'QR3',
+	17: 'QR4',
+	19: 'QR',
+	23: 'R128',
+	24: 'R64',
+	25: 'R32',
+	26: 'R16',
+	27: 'QF',
+	28: 'SF',
+	29: 'F',
+}
+
 
 // Status description
 // export const matchStatus = {

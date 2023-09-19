@@ -18,9 +18,12 @@ export const getMatchStatus = (statusInput: number, api_id: number): Status => {
 }
 
 export const getMatchRound = (roundInput: number, api_id: number): IPreMatch['round'] => {
-	const round = matchRound[roundInput]
+	
+	if (roundInput === undefined) {
+		return 'unknown'
+	}
 
-	console.log(round)
+	const round = matchRound[roundInput]
 
 	if (round === undefined) {
 		logger.warn(`It was not possible to identify match ROUND for match with id: ${api_id}`)
