@@ -2,11 +2,10 @@ import Court from '@database/models/court.model'
 import { Player } from '@database/models/player.model'
 import PreMatch from '@database/models/preMatch.model'
 import RequestsInfo from '@database/models/requestsInfo.model'
-import { Team } from '@database/models/team.model'
 import Tournament from '@database/models/tournament.model'
 import type { Document } from 'mongoose'
-import type { ICourt, IPlayer, IPreMatch, IRequestsInfo, ITeam, ITournament } from 'types/schemas'
-import { createError } from 'utils/createError'
+import type { ICourt, IPlayer, IPreMatch, IRequestsInfo, ITournament } from 'types/schemas'
+import { createError } from '@utils/createError'
 
 const getCourt = async (api_id: number): Promise<ICourt & Document | null> => {
 	try {
@@ -34,27 +33,14 @@ const getPlayer = async (api_id: number): Promise<IPlayer & Document | null> => 
 
 const getPreMatch = async (api_id: number): Promise<IPreMatch & Document | null> => {
 	try {
-		const existingPreMatch = await PreMatch.findOne({
+		const existingPopulatedMatch = await PreMatch.findOne({
 			api_id,
-		}).populate('p1')
+		}).populate('tournament').populate('court').populate('home').populate('away')
 		
-		// .populate('tournament').populate('court').populate('p1').populate('p2')
-
-		return existingPreMatch
+		return existingPopulatedMatch
 	} catch (err) {
+		console.log(err)
 		throw createError(err, 'get prematch', { api_id, collection: 'prematch' })
-	}
-}
-
-const getTeam = async (api_id: number): Promise<ITeam & Document | null> => {
-	try {
-		const existingTeam = await Team.findOne({
-			api_id,
-		})
-
-		return existingTeam
-	} catch (err) {
-		throw createError(err, 'get team', { api_id, collection: 'team' })
 	}
 }
 
@@ -85,7 +71,6 @@ const getRequestsInfo = async (formattedDate: string): Promise<IRequestsInfo & D
 
 const GET = {
 	getPlayer,
-	getTeam,
 	getCourt,
 	getPreMatch,
 	getTournament,

@@ -1,6 +1,6 @@
 import type { IRequestsInfo } from 'types/schemas'
 import { Schema, model } from 'mongoose'
-import { hours } from 'constants/data'
+import { hours } from '@constants/data'
 
 const requestsInfoSchema = new Schema<IRequestsInfo>(
 	{

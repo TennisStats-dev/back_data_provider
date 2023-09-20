@@ -1,6 +1,6 @@
 import config from '@config/index'
 import logger from '@config/logger'
-import { generateFormatDate } from 'utils/formatDate'
+import { generateFormatDate } from '@utils/formatDate'
 
 export const checkIfCanProceedOnDB = async (date: Date, numReqToDo: number): Promise<boolean> => {
 	if (numReqToDo > config.api.requests.maxToProceed) {

@@ -1,8 +1,8 @@
 import config from '@config/index'
 import logger from '@config/logger'
 import RequestsInfo from '@database/models/requestsInfo.model'
-import { createError } from 'utils/createError'
-import { generateFormatDate } from 'utils/formatDate'
+import { createError } from '@utils/createError'
+import { generateFormatDate } from '@utils/formatDate'
 
 export const updateRequestsInfo = async (date: Date): Promise<void> => {
 	try {

@@ -1,8 +1,8 @@
 import config from '@config/index'
 import logger from '@config/logger'
-import type { EventOdds } from 'API/types/eventOdds'
-import { matchRound, matchStatus } from 'constants/data'
-import type { ICourt, IPlayer, IPreMatch, IPreOdds, ITeam, ITournament, Status } from 'types/schemas'
+import type { EventOdds } from '@API/types/eventOdds'
+import { matchRound, matchStatus } from '@constants/data'
+import type { ICourt, IDoublesPlayer, IPlayer, IPreMatch, IPreOdds, ITournament, Status, Type } from 'types/schemas'
 
 export const checkIfIsTennisMatch = (sportId: number): boolean => {
 	return sportId === 13
@@ -21,16 +21,14 @@ export const getMatchStatus = (statusInput: number, api_id: number): Status => {
 
 export const getMatchRound = (roundInput: string | undefined, api_id: number): IPreMatch['round'] => {
 	if (roundInput === undefined) {
-		return 'unknown'
+		return undefined
 	}
-
-	console.log("se llega a la seiguiente parte ------------")
 
 	const round = matchRound[Number(roundInput)]
 
 	if (round === undefined) {
 		logger.warn(`It was not possible to identify match ROUND for match with id: ${api_id}`)
-		return 'unknown'
+		return undefined
 	} else {
 		return round
 	}
@@ -74,14 +72,15 @@ export const createNewPreMatchObject = (
 	api_id: number,
 	bet365_id: number,
 	sport_id: number,
+	type: Type,
 	roundInput: string | undefined,
 	tournament: ITournament,
 	court: ICourt | null,
-	p1: IPlayer | ITeam,
-	p2: IPlayer | ITeam,
+	home: IPlayer | IDoublesPlayer,
+	away: IPlayer | IDoublesPlayer,
 	statusInput: string,
 	est_time: Date,
-	pre_odds: IPreOdds | null
+	pre_odds: IPreOdds | null,
 ): IPreMatch => {
 	const round = getMatchRound(roundInput, api_id)
 	const status = getMatchStatus(Number(statusInput), api_id)
@@ -90,9 +89,10 @@ export const createNewPreMatchObject = (
 		api_id,
 		sport_id,
 		round,
+		type,
 		tournament,
-		p1,
-		p2,
+		home,
+		away,
 		status,
 		est_time,
 	}

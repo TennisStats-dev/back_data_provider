@@ -1,11 +1,9 @@
 import config from '@config/index'
-import { bestOfSets, gender, grounds, type } from 'constants/data'
-import type { BestOfSets, Gender, Ground, ITournament, Type } from 'types/schemas'
-import { checkIfArrayIncludesSubstring } from 'utils/checkArrayIncludesSubstring'
-import { checkIfIsTeam } from './team.services'
+import { bestOfSets, gender, grounds, type } from '@constants/data'
+import type { Gender, ITournament, Type } from 'types/schemas'
+import { checkIfArrayIncludesSubstring } from '@utils/checkArrayIncludesSubstring'
 import logger from '@config/logger'
-import { API } from 'API'
-import { countriesArray, countriesCCArray } from 'constants/countries'
+import { countriesArray, countriesCCArray } from '@constants/countries'
 
 export const checkIfIsDoubles = (tournamentName: string): boolean => {
 	return checkIfArrayIncludesSubstring(config.api.formats.doubleTournament, tournamentName)
@@ -27,7 +25,7 @@ export const getTournamentCircuit = (
 	tournamentName: string,
 	tournamentId: number,
 	matchId: number,
-): ITournament['circuit'] => {
+): ITournament['circuit'] | undefined => {
 	let circuitIndex: number | undefined
 
 	config.api.constants.circuit.forEach((element, index) => {
@@ -38,28 +36,13 @@ export const getTournamentCircuit = (
 
 	if (circuitIndex === undefined) {
 		logger.warn(`It was not possible to identify a CIRCUIT for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`)
-		return 'unknown'
+		return undefined
 	} else {
 		return config.api.constants.circuit[circuitIndex]
 	}
-
-	// const circuit = circuitsArray.find((constant, index) => {
-	// 	if (tournamentName.includes(constant)) {
-	// 		return index
-	// 	}
-	// })
-
-	// if (circuit === undefined) {
-	// 	logger.warn(`It was not possible to identify a CIRCUIT for tournament: ${tournamentName} - ID: ${tournamentId}`)
-	// 	return 'unknown'
-	// }
-
-	// return circuit
 }
 
 export const getTournamentTypeAndGender = (
-	p1Name: string,
-	p2Name: string,
 	tournamentName: string,
 	tournamentId: number,
 	matchId: number,
@@ -71,7 +54,7 @@ export const getTournamentTypeAndGender = (
 		}
 	}
 
-	const isDoubles = checkIfIsDoubles(tournamentName) || (checkIfIsTeam(p1Name) && checkIfIsTeam(p2Name))
+	const isDoubles = checkIfIsDoubles(tournamentName)
 
 	const isWomen = checkIfIsWomen(tournamentName)
 
@@ -109,14 +92,14 @@ export const getTournamentBestOfsets = (
 	tournamentName: string,
 	tournamentId: number,
 	matchId: number,
-): BestOfSets => {
+): ITournament['best_of_sets'] => {
 	const best_of_sets = bestOfSets[bestOfSetsInput]
 
 	if (best_of_sets === undefined) {
 		logger.warn(
 			`It was not possible to identify a valid BEST OF SETS for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`,
 		)
-		return bestOfSets[3]
+		return undefined
 	}
 
 	return best_of_sets
@@ -127,14 +110,13 @@ export const getTournamentGround = (
 	tournamentName: string,
 	tournamentId: number,
 	matchId: number,
-): Ground => {
+): ITournament['ground'] => {
 	const ground = grounds[groundInput]
 
 	if (ground === undefined) {
 		logger.warn(`It was not possible to identify a valid GROUND for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`)
-		return grounds[API.constants.ground.hard.format]
+		return undefined
 	}
-
 	return ground
 }
 
@@ -142,15 +124,14 @@ export const createNewCompletTournamentObject = (
 	matchId: number,
 	api_id: number,
 	name: string,
-	p1Name: string,
-	p2Name: string,
 	bestOfSetsInput: string,
 	groundInput: string,
 	city: string,
 	cc: string | null,
 	countryInput: string,
 ): ITournament => {
-	const { type } = getTournamentTypeAndGender(p1Name, p2Name, name, api_id, matchId)
+
+	const { type } = getTournamentTypeAndGender(name, api_id, matchId)
 
 	const circuit = getTournamentCircuit(name, api_id, matchId)
 
@@ -161,8 +142,8 @@ export const createNewCompletTournamentObject = (
 	const tournamentData: ITournament = {
 		api_id,
 		name,
-		circuit,
 		city,
+		circuit,
 		type,
 		best_of_sets,
 		ground,
@@ -187,11 +168,9 @@ export const createNewIncompletTournamentObject = (
 	matchId: number,
 	api_id: number,
 	name: string,
-	p1Name: string,
-	p2Name: string,
 	cc: string | null,
 ): ITournament => {
-	const { type } = getTournamentTypeAndGender(p1Name, p2Name, name, api_id, matchId)
+	const { type } = getTournamentTypeAndGender(name, api_id, matchId)
 
 	const circuit = getTournamentCircuit(name, api_id, matchId)
 	const tournamentData: ITournament = {
@@ -210,3 +189,5 @@ export const createNewIncompletTournamentObject = (
 
 	return tournamentData
 }
+
+

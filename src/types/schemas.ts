@@ -1,4 +1,4 @@
-import { type countriesCC } from 'constants/countries'
+import { type countriesCC } from '@constants/countries'
 import type {
 	matchStatus,
 	matchRound,
@@ -11,7 +11,8 @@ import type {
 	consistencyArray,
 	playerOptionArray,
 	circuitArray,
-} from 'constants/data'
+	playerType,
+} from '@constants/data'
 
 export type CountriesCC = (typeof countriesCC)[number]
 
@@ -29,6 +30,8 @@ export type Circuit = (typeof circuitArray)[number]
 
 export type Type = (typeof typeArray)[number]
 
+export type PlayerType = (typeof playerType)[number]
+
 export type BestOfSets = (typeof bestOfSets)[number]
 
 export type Consistency = (typeof consistencyArray)[number]
@@ -37,24 +40,18 @@ export type PlayerOption = (typeof playerOptionArray)[number]
 
 export type Hours = (typeof hours)[number]
 
-export interface IPlayer {
-	api_id: number
-	name: string
-	gender: Gender
-	birth?: Date
-	cc?: string
-}
-
-export interface ITeam {
-	api_id: number
-	team_p1?: IPlayer
-	team_p2?: IPlayer
-}
+// export interface IPlayerDetails {
+// 	api_id: number
+// 	name: string
+// 	gender: Gender
+// 	birth?: Date
+// 	cc?: string
+// }
 
 export interface ITournament {
 	api_id: number
 	name: string
-	circuit: Circuit | 'unknown'
+	circuit?: Circuit
 	type: Type
 	best_of_sets?: BestOfSets
 	ground?: Ground
@@ -113,15 +110,36 @@ export interface IPreOdds {
 	}
 }
 
+export interface IPlayer {
+	api_id: number
+	name: string
+	gender: Gender
+	birth?: Date
+	cc?: string
+}
+
+export interface IDoublesPlayer {
+	api_id: number
+	name: string
+	gender: Gender
+	birth?: Date
+	cc?: string
+	team: {
+		p1: IPlayer,
+		p2?: IPlayer
+	}
+}
+
 export interface IPreMatch {
 	api_id: number
 	bet365_id?: number
 	sport_id: number
-	round: Round | 'unknown'
+	type: Type
+	round?: Round
 	tournament: ITournament
 	court?: ICourt
-	p1: IPlayer | ITeam
-	p2: IPlayer | ITeam
+	home: IPlayer | IDoublesPlayer
+	away: IPlayer | IDoublesPlayer
 	status: Status
 	est_time: Date
 	pre_odds?: IPreOdds
@@ -136,13 +154,14 @@ export interface IMatch extends IPreMatch {
 
 export interface IPlayerRanking {
 	rank: number
-	player: IPlayer | ITeam
+	player: IPlayer | [IPlayer, IPlayer]
 	points: number
 	tourn_played: number
 }
 
 export interface IRanking {
 	date: Date
+	type: Type
 	ranking: IPlayerRanking[]
 }
 

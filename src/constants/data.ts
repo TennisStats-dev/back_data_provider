@@ -1,5 +1,4 @@
-import { API } from "API"
-
+import { API } from "@API/index"
 
 export const matchRound = {
 	[API.constants.matchRounds[14]]: 'QR1',
@@ -149,6 +148,8 @@ export const type = {
 } as const
 
 export const typeArray = Array.from(Object.values(type))
+
+export const playerType = ['Player', 'Team'] as const
 
 
 export const bestOfSets = {

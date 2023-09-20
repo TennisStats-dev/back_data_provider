@@ -9,7 +9,7 @@ function mongo(): void {
 		mongoose
 		.connect(testDbURL)
 		.then(() => {
-			logger.info('Connected to TEST DB of mongoDB')
+			logger.info('MODE: development - Connected to TEST DB of mongoDB')
 		})
 		.catch((err) => {
 			logger.error(err)
@@ -19,7 +19,7 @@ function mongo(): void {
 			mongoose
 			.connect(dbURL)
 			.then(() => {
-				logger.info('Connected to PRODUCTION DB of mongoDB')
+				logger.info('MODE: production - Connected to PRODUCTION DB of mongoDB')
 			})
 			.catch((err) => {
 				logger.error(err)			})

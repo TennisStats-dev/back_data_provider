@@ -3,12 +3,11 @@ import Court from '@database/models/court.model'
 import { Player } from '@database/models/player.model'
 import PreMatch from '@database/models/preMatch.model'
 import RequestsInfo from '@database/models/requestsInfo.model'
-import { Team } from '@database/models/team.model'
 import Tournament from '@database/models/tournament.model'
-import { hours } from 'constants/data'
+import { hours } from '@constants/data'
 import type { Document } from 'mongoose'
-import type { ICourt, IPlayer, IPreMatch, IRequestsInfo, ITeam, ITournament } from 'types/schemas'
-import { createError } from 'utils/createError'
+import type { ICourt, IPlayer, IPreMatch, IRequestsInfo, ITournament } from 'types/schemas'
+import { createError } from '@utils/createError'
 
 const saveNewCourt = async (courtData: ICourt): Promise<ICourt & Document> => {
 	try {
@@ -24,25 +23,18 @@ const saveNewCourt = async (courtData: ICourt): Promise<ICourt & Document> => {
 
 const saveNewPlayer = async (playerData: IPlayer): Promise<IPlayer & Document> => {
 	try {
+
+		console.log('jugador guardándose:', playerData)
 		const newPlayer = new Player(playerData)
+
+		console.log('jugador del modelo creado', newPlayer)
 		const savedPlayer = await newPlayer.save()
 
 		logger.info(`New player saved - NAME: ${savedPlayer.name} - ID: ${savedPlayer.api_id}`)
 		return savedPlayer
 	} catch (err) {
+
 		throw createError(err, 'save new player', { api_id: playerData.api_id, collection: 'Player' })
-	}
-}
-
-const saveNewTeam = async (teamData: any): Promise<ITeam & Document> => {
-	try {
-		const newTeam = new Team(teamData)
-		const savedTeam = await newTeam.save()
-		logger.info(`New temporal team saved - ID: ${savedTeam.api_id}`)
-
-		return savedTeam
-	} catch (err) {
-		throw createError(err, 'save new Team', { api_id: teamData.api_id, collection: 'Team' })
 	}
 }
 
@@ -61,15 +53,18 @@ const saveNewTournament = async (tournamentData: ITournament): Promise<ITourname
 
 const saveNewPreMatch = async (matchData: IPreMatch): Promise<IPreMatch & Document> => {
 	try {
+
+		console.log(matchData)
 		const newPreMatch = new PreMatch(matchData)
 
 		const savedPreMatch = await newPreMatch.save()
 
 		logger.info(
-			`New pre match saved - ID: ${savedPreMatch.api_id} - P1: ${matchData.p1.api_id} - - P2: ${matchData.p2.api_id}`,
+			`New pre match saved - ID: ${savedPreMatch.api_id} - P1: ${matchData.home.api_id} - - P2: ${matchData.away.api_id}`,
 		)
 		return savedPreMatch
 	} catch (err) {
+		console.log(err)
 		throw createError(err, 'save new preMatch', { api_id: matchData.api_id, collection: 'preMatch' })
 	}
 }
@@ -99,7 +94,6 @@ const SAVE = {
 	saveNewCourt,
 	saveNewRequestInfo,
 	saveNewPlayer,
-	saveNewTeam,
 	saveNewTournament,
 	saveNewPreMatch
 }

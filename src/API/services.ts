@@ -1,10 +1,10 @@
 import config from '@config/index'
 import axios from 'axios'
-import type { MatchView, MatchViewRes } from 'API/types/MatchView'
-import type { TeamMembers, TeamMembersRes } from 'API/types/teamMembers'
-import type { UpcomingMatchesRes } from 'API/types/upcomingMatches'
+import type { MatchView, MatchViewRes } from '@API/types/MatchView'
+import type { TeamMembers, TeamMembersRes } from '@API/types/teamMembers'
+import type { UpcomingMatchesRes } from '@API/types/upcomingMatches'
 import type { EventOdds, EventOddsRes } from './types/eventOdds'
-import { createError } from 'utils/createError'
+import { createError } from '@utils/createError'
 
 const getUpcomingMatches = async (page: number = 1): Promise<UpcomingMatchesRes> => {
 	try {
