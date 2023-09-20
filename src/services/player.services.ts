@@ -24,7 +24,8 @@ export const createNewPlayerObject = (
 	if (birth instanceof Date) {
 		playerData.birth = birth
 	}
-	if (cc !== null && !countriesCCArray.includes(cc)) {
+
+	if (cc !== null && cc !== '' && !countriesCCArray.includes(cc)) {
 		logger.warn(`There is a player with a not stored cc - CC: ${cc}`)
 		playerData.cc = cc
 	} else if (cc !== null && countriesCCArray.includes(cc)) {
@@ -55,7 +56,8 @@ export const createNewDoublesPlayerObject = (
 	if (birth instanceof Date) {
 		doublesPlayerData.birth = birth
 	}
-	if (cc !== undefined && !countriesCCArray.includes(cc)) {
+
+	if (cc !== undefined && cc !== '' && !countriesCCArray.includes(cc)) {
 		logger.warn(`There is a player with a not stored cc - CC: ${cc}`)
 		doublesPlayerData.cc = cc
 	} else if (cc !== undefined && countriesCCArray.includes(cc)) {

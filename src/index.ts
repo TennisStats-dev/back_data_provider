@@ -6,7 +6,6 @@ import { saveUpcomingMatches } from '@controllers/matchControllers'
 import { getMatchDetails } from './test'
 import config from './config'
 import logger from '@config/logger'
-import { msToTime } from '@utils/msToTime'
 
 export const app = express()
 app.use(express.json())
@@ -25,5 +24,3 @@ config.database.connection.connectDB()
 app.listen(config.server.port, () => {
 	logger.info(`Server running on port ${config.server.port}`)
 })
-
-msToTime(48083)

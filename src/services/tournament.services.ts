@@ -35,7 +35,9 @@ export const getTournamentCircuit = (
 	})
 
 	if (circuitIndex === undefined) {
-		logger.warn(`It was not possible to identify a CIRCUIT for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`)
+		logger.warn(
+			`It was not possible to identify a CIRCUIT for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`,
+		)
 		return undefined
 	} else {
 		return config.api.constants.circuit[circuitIndex]
@@ -61,7 +63,9 @@ export const getTournamentTypeAndGender = (
 	const isMen = checkIfIsMen(tournamentName)
 
 	if (!isWomen && !isMen) {
-		logger.warn(`It was not possible to recognize GENDER for TOURNAMENT: ${tournamentName} with ID: ${tournamentId} - MATCH ID: ${matchId}`)
+		logger.warn(
+			`It was not possible to recognize GENDER for TOURNAMENT: ${tournamentName} with ID: ${tournamentId} - MATCH ID: ${matchId}`,
+		)
 	}
 
 	if (isDoubles && isWomen) {
@@ -88,49 +92,55 @@ export const getTournamentTypeAndGender = (
 }
 
 export const getTournamentBestOfsets = (
-	bestOfSetsInput: string,
+	bestOfSetsInput: string | undefined,
 	tournamentName: string,
 	tournamentId: number,
 	matchId: number,
 ): ITournament['best_of_sets'] => {
-	const best_of_sets = bestOfSets[bestOfSetsInput]
-
-	if (best_of_sets === undefined) {
-		logger.warn(
-			`It was not possible to identify a valid BEST OF SETS for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`,
-		)
+	if (bestOfSetsInput !== undefined) {
+		const best_of_sets = bestOfSets[bestOfSetsInput]
+		if (best_of_sets === undefined) {
+			logger.warn(
+				`It was not possible to identify a valid BEST OF SETS for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`,
+			)
+			return undefined
+		}
+		return best_of_sets
+	} else {
 		return undefined
 	}
-
-	return best_of_sets
 }
 
 export const getTournamentGround = (
-	groundInput: string,
+	groundInput: string | undefined,
 	tournamentName: string,
 	tournamentId: number,
 	matchId: number,
 ): ITournament['ground'] => {
-	const ground = grounds[groundInput]
+	if (groundInput !== undefined) {
+		const ground = grounds[groundInput]
 
-	if (ground === undefined) {
-		logger.warn(`It was not possible to identify a valid GROUND for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`)
-		return undefined
+		if (ground === undefined) {
+			logger.warn(
+				`It was not possible to identify a valid GROUND for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`,
+			)
+			return undefined
+		}
+		return ground
 	}
-	return ground
+	return undefined
 }
 
 export const createNewCompletTournamentObject = (
 	matchId: number,
 	api_id: number,
 	name: string,
-	bestOfSetsInput: string,
-	groundInput: string,
 	city: string,
 	cc: string | null,
 	countryInput: string,
+	bestOfSetsInput: string | undefined,
+	groundInput: string | undefined,
 ): ITournament => {
-
 	const { type } = getTournamentTypeAndGender(name, api_id, matchId)
 
 	const circuit = getTournamentCircuit(name, api_id, matchId)
@@ -149,7 +159,7 @@ export const createNewCompletTournamentObject = (
 		ground,
 	}
 
-	if (cc !== null && !countriesCCArray.includes(cc)) {
+	if (cc !== null && cc !== "" && !countriesCCArray.includes(cc)) {
 		const countryName = countriesArray.find((country) => country.name === countryInput)
 		if (countryName === undefined) {
 			logger.warn(`There is a player with a not stored cc - CC: ${cc}`)
@@ -180,7 +190,7 @@ export const createNewIncompletTournamentObject = (
 		type,
 	}
 
-	if (cc !== null && !countriesCCArray.includes(cc)) {
+	if (cc !== null && cc !== "" && !countriesCCArray.includes(cc)) {
 		logger.warn(`There is a player with a not stored cc - CC: ${cc}`)
 		tournamentData.cc = cc
 	} else if (cc !== null && countriesCCArray.includes(cc)) {
@@ -189,5 +199,3 @@ export const createNewIncompletTournamentObject = (
 
 	return tournamentData
 }
-
-
