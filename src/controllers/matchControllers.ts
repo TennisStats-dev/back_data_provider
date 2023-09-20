@@ -8,13 +8,13 @@ import { createNewPreMatchObject, getMatchPreOdds } from '@services/match.servic
 import { createNewDoublesPlayerObject, createNewPlayerObject } from '@services/player.services'
 import { createNewCourtObject } from '@services/court.services'
 import { createNewCompletTournamentObject, createNewIncompletTournamentObject } from '@services/tournament.services'
+import { msToTime } from '@utils/msToTime'
 
 
 export const saveUpcomingMatches = async (_req: Request, _res: Response): Promise<void> => {
 	try {
         const startDate = new Date()       
-        // console.log(' Save upcoming matches started at: ', startDate)
-        // console.log(' Save upcoming matches started at: ', startDate.toString())
+
         logger.info(`Save upcoming matches started at: ${startDate.toString()}`)
 		const allUpcomingMatches: UpcomingMatches[] = []
 		let page = 1
@@ -218,7 +218,9 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
         if (match.bet365_id !== undefined) {
             const eventOdss = await config.api.services.getMatchOdds(Number(match.id))
 
-            pre_odds = getMatchPreOdds(eventOdss)
+            if (eventOdss.odds[config.api.constants.oddsMarketsRef.winner].length < 1) {
+                pre_odds = getMatchPreOdds(eventOdss)
+            }
         }
 
         if (home !== null && away !== null) {
@@ -251,8 +253,8 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
     const newMatchesId = newMatchesSaved.map(e => e.api_id)
     logger.info(newMatchesId)
     const finishDate = new Date()
-    const duration = finishDate.getTime() - startDate.getTime()
-    logger.info(`${newMatchesSaved.length} matches have been saved - The process finished at`, finishDate.toString(), 'with a duration of :', duration)
+    const duration = msToTime(finishDate.getTime() - startDate.getTime())
+    logger.info(`${newMatchesSaved.length} matches have been saved - The process finished at: ${finishDate.toString()}, TOTAL DURATION :', ${duration}`)
 
 	} catch (err) {
 		logger.error(err)
