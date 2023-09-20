@@ -12,8 +12,10 @@ import { createNewCompletTournamentObject, createNewIncompletTournamentObject } 
 
 export const saveUpcomingMatches = async (_req: Request, _res: Response): Promise<void> => {
 	try {
-        const startDate = new Date()
-        logger.info(' Save upcoming matches started at: ', startDate)
+        const startDate = new Date()       
+        // console.log(' Save upcoming matches started at: ', startDate)
+        // console.log(' Save upcoming matches started at: ', startDate.toString())
+        logger.info(`Save upcoming matches started at: ${startDate.toString()}`)
 		const allUpcomingMatches: UpcomingMatches[] = []
 		let page = 1
 
@@ -249,7 +251,8 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
     const newMatchesId = newMatchesSaved.map(e => e.api_id)
     logger.info(newMatchesId)
     const finishDate = new Date()
-    logger.info(`${newMatchesSaved.length} matches have been saved - The process finished at`, finishDate)
+    const duration = finishDate.getTime() - startDate.getTime()
+    logger.info(`${newMatchesSaved.length} matches have been saved - The process finished at`, finishDate.toString(), 'with a duration of :', duration)
 
 	} catch (err) {
 		logger.error(err)
