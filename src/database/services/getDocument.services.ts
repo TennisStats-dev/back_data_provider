@@ -1,3 +1,4 @@
+import logger from '@config/logger'
 import Court from '@database/models/court.model'
 import { Player } from '@database/models/player.model'
 import PreMatch from '@database/models/preMatch.model'
@@ -5,7 +6,6 @@ import RequestsInfo from '@database/models/requestsInfo.model'
 import Tournament from '@database/models/tournament.model'
 import type { Document } from 'mongoose'
 import type { ICourt, IPlayer, IPreMatch, IRequestsInfo, ITournament } from 'types/schemas'
-import { createError } from '@utils/createError'
 
 const getCourt = async (api_id: number): Promise<ICourt & Document | null> => {
 	try {
@@ -15,7 +15,9 @@ const getCourt = async (api_id: number): Promise<ICourt & Document | null> => {
 
 		return existingCourt
 	} catch (err) {
-		throw createError(err, 'get court', { api_id, collection: 'court' })
+		console.log(err)
+		logger.error("Error getting a court")
+		throw new Error("Error getting a court")
 	}
 }
 
@@ -27,7 +29,9 @@ const getPlayer = async (api_id: number): Promise<IPlayer & Document | null> => 
 
 		return existingPlayer
 	} catch (err) {
-		throw createError(err, 'get player', { api_id, collection: 'player' })
+		console.log(err)
+		logger.error("Error getting a player")
+		throw new Error("Error getting a player")
 	}
 }
 
@@ -40,7 +44,8 @@ const getPreMatch = async (api_id: number): Promise<IPreMatch & Document | null>
 		return existingPopulatedMatch
 	} catch (err) {
 		console.log(err)
-		throw createError(err, 'get prematch', { api_id, collection: 'prematch' })
+		logger.error("Error getting a pre match")
+		throw new Error("Error getting a pre match")
 	}
 }
 
@@ -52,7 +57,9 @@ const getTournament = async (api_id: number): Promise<ITournament & Document | n
 
 		return existingTorunament
 	} catch (err) {
-		throw createError(err, 'get tournament', { api_id, collection: 'tournament' })
+		console.log(err)
+		logger.error("Error getting a tournament")
+		throw new Error("Error getting a tournament")
 	}
 }
 
@@ -65,7 +72,9 @@ const getRequestsInfo = async (formattedDate: string): Promise<IRequestsInfo & D
 
 		return existingRequestInfoDay
 	} catch (err) {
-		throw createError(err, 'get requestInfo', { collection: 'requestsInfo' })
+		console.log(err)
+		logger.error("Error getting the requests info")
+		throw new Error("Error getting the requests info")
 	}
 }
 

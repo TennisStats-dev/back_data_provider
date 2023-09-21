@@ -1,7 +1,6 @@
 import config from '@config/index'
 import logger from '@config/logger'
 import RequestsInfo from '@database/models/requestsInfo.model'
-import { createError } from '@utils/createError'
 import { generateFormatDate } from '@utils/formatDate'
 
 export const updateRequestsInfo = async (date: Date): Promise<void> => {
@@ -25,7 +24,9 @@ export const updateRequestsInfo = async (date: Date): Promise<void> => {
 			}
 		}
 	} catch (err) {
-		throw createError(err, 'update requestsInfo', { collection: 'requestsInfo' })
+		console.log(err)
+		logger.error("Error when updating a requests info")
+		throw new Error("Error when updating a requests info")
 	}
 }
 

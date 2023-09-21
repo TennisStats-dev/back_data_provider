@@ -2,10 +2,10 @@
 import 'module-alias/register'
 import 'dotenv/config'
 import express from 'express'
-import { saveUpcomingMatches } from '@controllers/matchControllers'
-import { getMatchDetails } from './test'
 import config from './config'
 import logger from '@config/logger'
+import { saveUpcomingMatches } from '@controllers/matchControllers'
+import { getMatchDetails } from './test'
 
 export const app = express()
 app.use(express.json())

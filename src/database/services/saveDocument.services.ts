@@ -6,17 +6,18 @@ import Tournament from '@database/models/tournament.model'
 import { hours } from '@constants/data'
 import type { Document } from 'mongoose'
 import type { ICourt, IPlayer, IPreMatch, IRequestsInfo, ITournament } from 'types/schemas'
-import { createError } from '@utils/createError'
+import logger from '@config/logger'
 
 const saveNewCourt = async (courtData: ICourt): Promise<ICourt & Document> => {
 	try {
 		const newCourt = new Court(courtData)
 		const savedCourt = await newCourt.save()
 
-		// logger.info(`New court saved - NAME: ${savedCourt.name} - ID: ${savedCourt.api_id}`)
 		return savedCourt
 	} catch (err) {
-		throw createError(err, 'save new court', { api_id: courtData.api_id, collection: 'court' })
+		console.log(err)
+		logger.error("Error when saving a new court")
+		throw new Error("Error when saving a new court")
 	}
 }
 
@@ -26,10 +27,11 @@ const saveNewPlayer = async (playerData: IPlayer): Promise<IPlayer & Document> =
 
 		const savedPlayer = await newPlayer.save()
 
-		// logger.info(`New player saved - NAME: ${savedPlayer.name} - ID: ${savedPlayer.api_id}`)
 		return savedPlayer
 	} catch (err) {
-		throw createError(err, 'save new player', { api_id: playerData.api_id, collection: 'Player' })
+		console.log(err)
+		logger.error("Error when saving a new player")
+		throw new Error("Error when saving a new player")
 	}
 }
 
@@ -42,7 +44,9 @@ const saveNewTournament = async (tournamentData: ITournament): Promise<ITourname
 
 		return savedTournament
 	} catch (err: any) {
-		throw createError(err, 'save new tournament', { api_id: tournamentData.api_id, collection: 'tournament' })
+		console.log(err)
+		logger.error("Error when saving a new tournament")
+		throw new Error("Error when saving a new tournament")
 	}
 }
 
@@ -55,7 +59,8 @@ const saveNewPreMatch = async (matchData: IPreMatch): Promise<IPreMatch & Docume
 		return savedPreMatch
 	} catch (err) {
 		console.log(err)
-		throw new Error("Error when saving a new prematch")
+		logger.error("Error when saving a new pre match")
+		throw new Error("Error when saving a new pre match")
 	}
 }
 
@@ -76,7 +81,9 @@ const saveNewRequestInfo = async (formattedDate: string): Promise<IRequestsInfo 
 
 		return savedRequestInfoDay
 	} catch (err) {
-		throw createError(err, 'save new requestsInfo', { collection: 'requestsInfo' })
+		console.log(err)
+		logger.error("Error when saving a new requests info")
+		throw new Error("Error when saving a new requests info")
 	}
 }
 
