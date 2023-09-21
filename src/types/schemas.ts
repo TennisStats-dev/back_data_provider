@@ -99,13 +99,13 @@ interface ISetStats {
 
 export interface IPreOdds {
 	last: {
-		win: [number, number]
-		win_1st_set?: [number, number]
+		win: [string, string]
+		win_1st_set?: [string, string]
 		update: Date
 	}
 	first: {
-		win: [number, number]
-		win_1st_set?: [number, number]
+		win: [string, string]
+		win_1st_set?: [string, string]
 		time: Date
 	}
 }

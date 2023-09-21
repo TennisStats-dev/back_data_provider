@@ -52,12 +52,10 @@ const saveNewPreMatch = async (matchData: IPreMatch): Promise<IPreMatch & Docume
 
 		const savedPreMatch = await newPreMatch.save()
 
-		// logger.info(
-		// 	`New pre match saved - ID: ${savedPreMatch.api_id} - P1: ${matchData.home.api_id} - - P2: ${matchData.away.api_id}`,
-		// )
 		return savedPreMatch
 	} catch (err) {
-		throw createError(err, 'save new preMatch', { api_id: matchData.api_id, collection: 'preMatch' })
+		console.log(err)
+		throw new Error("Error when saving a new prematch")
 	}
 }
 
