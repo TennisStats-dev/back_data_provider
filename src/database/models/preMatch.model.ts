@@ -16,13 +16,13 @@ const preMatchSchema = new Schema<IPreMatch>(
 		est_time: { type: Date, required: true },
 		pre_odds: {
 			first: {
-				win: { type: [Number, Number], default: undefined },
-				win_1st_set: { type: [Number, Number], default: undefined },
+				win: { type: [String, String], default: undefined },
+				win_1st_set: { type: [String, String], default: undefined },
 				time: { type: Date },
 			},
 			last: {
-				win: { type: [Number, Number], default: undefined },
-				win_1st_set: { type: [Number, Number], default: undefined },
+				win: { type: [String, String], default: undefined },
+				win_1st_set: { type: [String, String], default: undefined },
 				update: { type: Date },
 			},
 		},
