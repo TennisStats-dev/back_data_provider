@@ -21,6 +21,9 @@ app.get('/eventview/:id', getMatchDetails)
 
 config.database.connection.connectDB()
 
-app.listen(config.server.port, () => {
-	logger.info(`Server running on port ${config.server.port}`)
+// eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+const port = config.server.port || '0.0.0.0:$PORT'
+
+app.listen(port, () => {
+	logger.info(`Server running on port ${port}`)
 })
