@@ -174,3 +174,14 @@ export interface IRequestsInfo {
 	date: string
 	hour: IRequests[]
 }
+
+
+export interface IMatchPlayers {
+	home: IPlayer | IDoublesPlayer
+	away: IPlayer | IDoublesPlayer
+}
+
+export interface IMatchPlayersObject {
+	home: IPlayer | IDoublesPlayer | undefined
+	away: IPlayer | IDoublesPlayer | undefined
+}

@@ -4,24 +4,25 @@ import type { Gender, ITournament, Type } from 'types/schemas'
 import { checkIfArrayIncludesSubstring } from '@utils/checkArrayIncludesSubstring'
 import logger from '@config/logger'
 import { countriesArray, countriesCCArray } from '@constants/countries'
+import type { MatchView } from '@API/types/MatchView'
 
-export const checkIfIsDoubles = (tournamentName: string): boolean => {
+const checkIfIsDoubles = (tournamentName: string): boolean => {
 	return checkIfArrayIncludesSubstring(config.api.formats.doubleTournament, tournamentName)
 }
 
-export const checkIfIsMixedType = (tournamentName: string): boolean => {
+const checkIfIsMixedType = (tournamentName: string): boolean => {
 	return checkIfArrayIncludesSubstring(config.api.formats.mixedTypeTournament, tournamentName)
 }
 
-export const checkIfIsWomen = (tournamentName: string): boolean => {
+const checkIfIsWomen = (tournamentName: string): boolean => {
 	return checkIfArrayIncludesSubstring(config.api.formats.womenTournament, tournamentName)
 }
 
-export const checkIfIsMen = (tournamentName: string): boolean => {
+const checkIfIsMen = (tournamentName: string): boolean => {
 	return checkIfArrayIncludesSubstring(config.api.formats.menTournament, tournamentName)
 }
 
-export const getTournamentCircuit = (
+const getTournamentCircuit = (
 	tournamentName: string,
 	tournamentId: number,
 	matchId: number,
@@ -44,7 +45,7 @@ export const getTournamentCircuit = (
 	}
 }
 
-export const getTournamentTypeAndGender = (
+const getTournamentTypeAndGender = (
 	tournamentName: string,
 	tournamentId: number,
 	matchId: number,
@@ -91,7 +92,7 @@ export const getTournamentTypeAndGender = (
 	}
 }
 
-export const getTournamentBestOfsets = (
+const getTournamentBestOfsets = (
 	bestOfSetsInput: string | undefined,
 	tournamentName: string,
 	tournamentId: number,
@@ -111,7 +112,7 @@ export const getTournamentBestOfsets = (
 	}
 }
 
-export const getTournamentGround = (
+const getTournamentGround = (
 	groundInput: string | undefined,
 	tournamentName: string,
 	tournamentId: number,
@@ -131,7 +132,7 @@ export const getTournamentGround = (
 	return undefined
 }
 
-export const createNewCompletTournamentObject = (
+const createNewCompletTournamentObject = (
 	matchId: number,
 	api_id: number,
 	name: string,
@@ -141,6 +142,7 @@ export const createNewCompletTournamentObject = (
 	bestOfSetsInput: string | undefined,
 	groundInput: string | undefined,
 ): ITournament => {
+
 	const { type } = getTournamentTypeAndGender(name, api_id, matchId)
 
 	const circuit = getTournamentCircuit(name, api_id, matchId)
@@ -159,7 +161,9 @@ export const createNewCompletTournamentObject = (
 		ground,
 	}
 
-	if (cc !== null && cc !== "" && !countriesCCArray.includes(cc)) {
+	if (cc !== null && countriesCCArray.includes(cc)) {
+		tournamentData.cc = cc
+	} else if (cc !== null && cc !== '' && !countriesCCArray.includes(cc)) {
 		const countryName = countriesArray.find((country) => country.name === countryInput)
 		if (countryName === undefined) {
 			logger.warn(`There is a player with a not stored cc - CC: ${cc}`)
@@ -167,19 +171,24 @@ export const createNewCompletTournamentObject = (
 		} else {
 			tournamentData.cc = countryName.cc
 		}
-	} else if (cc !== null && countriesCCArray.includes(cc)) {
-		tournamentData.cc = cc
+	} else if (cc === null || cc === '') {
+		const countryName = countriesArray.find((country) => country.name === countryInput)
+		
+		if (countryName != null) {
+			tournamentData.cc = countryName.cc
+		}
 	}
 
 	return tournamentData
 }
 
-export const createNewIncompletTournamentObject = (
+const createNewIncompletTournamentObject = (
 	matchId: number,
 	api_id: number,
 	name: string,
 	cc: string | null,
 ): ITournament => {
+
 	const { type } = getTournamentTypeAndGender(name, api_id, matchId)
 
 	const circuit = getTournamentCircuit(name, api_id, matchId)
@@ -190,7 +199,7 @@ export const createNewIncompletTournamentObject = (
 		type,
 	}
 
-	if (cc !== null && cc !== "" && !countriesCCArray.includes(cc)) {
+	if (cc !== null && cc !== '' && !countriesCCArray.includes(cc)) {
 		logger.warn(`There is a player with a not stored cc - CC: ${cc}`)
 		tournamentData.cc = cc
 	} else if (cc !== null && countriesCCArray.includes(cc)) {
@@ -198,4 +207,54 @@ export const createNewIncompletTournamentObject = (
 	}
 
 	return tournamentData
+}
+
+export const tournamentHandler = async (
+	matchId: number,
+	tournamentId: number,
+	tournamentName: string,
+	tournamentCC: string | null,
+	eventViewAPIResponse: MatchView,
+): Promise<ITournament> => {
+	let tournament: ITournament
+
+	const tournamentDB = await config.database.services.getters.getTournament(Number(tournamentId))
+
+	if (tournamentDB !== null) {
+		tournament = tournamentDB
+	} else if (eventViewAPIResponse.extra !== undefined) {
+		let best_of_sets: string | undefined
+		let ground: string | undefined
+
+		if (eventViewAPIResponse.extra.bestofsets !== undefined) {
+			best_of_sets = eventViewAPIResponse.extra.bestofsets
+		}
+		if (eventViewAPIResponse.extra.ground !== undefined) {
+			ground = eventViewAPIResponse.extra.ground
+		}
+
+		const tournamentObject = createNewCompletTournamentObject(
+			Number(matchId),
+			Number(tournamentId),
+			tournamentName,
+			eventViewAPIResponse.extra.stadium_data?.city,
+			tournamentCC,
+			eventViewAPIResponse.extra.stadium_data?.country,
+			best_of_sets,
+			ground,
+		)
+		const savedTournament = await config.database.services.savers.saveNewTournament(tournamentObject)
+		tournament = savedTournament
+	} else {
+		const tournamentObject = createNewIncompletTournamentObject(
+			Number(matchId),
+			Number(tournamentId),
+			tournamentName,
+			tournamentCC,
+		)
+		const savedTournament = await config.database.services.savers.saveNewTournament(tournamentObject)
+		tournament = savedTournament
+	}
+
+	return tournament
 }

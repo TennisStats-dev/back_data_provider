@@ -9,7 +9,6 @@ m < 10 ? m = `0${m}`: m = `${m}`
 h < 10 ? h = `0${h}`: h = `${h}`
 
 const result = `${h}h ${m}m ${s}s`
-console.log(result)
 
 return result
 }

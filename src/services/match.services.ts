@@ -1,8 +1,8 @@
 import config from '@config/index'
 import logger from '@config/logger'
-import type { EventOdds } from '@API/types/eventOdds'
 import { matchRound, matchStatus } from '@constants/data'
 import type { ICourt, IDoublesPlayer, IPlayer, IPreMatch, IPreOdds, ITournament, Status, Type } from 'types/schemas'
+import type { UpcomingMatches } from '@API/types/upcomingMatches'
 
 export const checkIfIsTennisMatch = (sportId: number): boolean => {
 	return sportId === 13
@@ -32,40 +32,6 @@ export const getMatchRound = (roundInput: string | undefined, api_id: number): I
 	} else {
 		return round
 	}
-}
-
-export const getMatchPreOdds = (eventOddsInput: EventOdds): IPreOdds | null => {
-	if (eventOddsInput.stats.matching_dir !== undefined) {
-		const WinnerObject = eventOddsInput.odds[config.api.constants.oddsMarketsRef.winner]
-
-		const firstSetWinnerObject = eventOddsInput.odds[config.api.constants.oddsMarketsRef.firstSetWinner]
-
-		const preMatchOddsObject: IPreOdds = {
-			first: {
-				win: [Number(WinnerObject.at(-1)?.home_od), Number(WinnerObject.at(-1)?.away_od)],
-				time: new Date(Number(WinnerObject[WinnerObject.length - 1].add_time) * 1000),
-			},
-			last: {
-				win: [Number(WinnerObject[0].home_od), Number(WinnerObject[0].away_od)],
-				update: new Date(Number(eventOddsInput.stats.odds_update['13_1']) * 1000),
-			},
-		}
-
-		if (eventOddsInput.odds[config.api.constants.oddsMarketsRef.firstSetWinner].length > 0) {
-			preMatchOddsObject.first.win_1st_set = [
-				Number(firstSetWinnerObject.at(-1)?.home_od),
-				Number(firstSetWinnerObject.at(-1)?.away_od),
-			]
-
-			preMatchOddsObject.last.win_1st_set = [
-				Number(firstSetWinnerObject[0].home_od),
-				Number(firstSetWinnerObject[0].away_od),
-			]
-		}
-
-		return preMatchOddsObject
-	}
-	return null
 }
 
 export const createNewPreMatchObject = (
@@ -110,4 +76,20 @@ export const createNewPreMatchObject = (
 	}
 
 	return matchData
+}
+
+export const getUpcomingMatchesFromAPI = async ():Promise<UpcomingMatches[]>  => {
+	const allUpcomingMatches: UpcomingMatches[] = []
+		let page = 1
+
+		const upcomingMatchesApiResponse = await config.api.services.getUpcomingMatches(page)
+		allUpcomingMatches.push(...upcomingMatchesApiResponse.results)
+
+		do {
+			page += 1
+			const apiResponse = await config.api.services.getUpcomingMatches(page)
+			allUpcomingMatches.push(...apiResponse.results)
+		} while (allUpcomingMatches.length < upcomingMatchesApiResponse.pager.total)
+
+		return allUpcomingMatches
 }
