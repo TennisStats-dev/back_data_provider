@@ -72,6 +72,7 @@ export const createNewPreMatchObject = (
 	}
 
 	if (pre_odds !== null) {
+
 		matchData.pre_odds = pre_odds
 	}
 

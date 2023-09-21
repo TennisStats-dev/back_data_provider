@@ -76,7 +76,6 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
 
 		const finishDate = new Date()
 		const duration = msToTime(finishDate.getTime() - startDate.getTime())
-		// newMatchesSaved.forEach(match => {console.log(`${match.api_id} - `)})
 		logger.info(
 			`${
 				newMatchesSaved.length

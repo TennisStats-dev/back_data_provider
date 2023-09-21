@@ -1,5 +1,5 @@
 // import module-alias from package.jdon once compiled (prod). It crashes the ts-node-dev if build folder is not up to date because when imported, ts node dev is fed by build folder
-import 'module-alias/register'
+// import 'module-alias/register'
 import 'dotenv/config'
 import express from 'express'
 import { saveUpcomingMatches } from '@controllers/matchControllers'
