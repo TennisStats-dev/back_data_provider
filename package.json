@@ -41,7 +41,8 @@
 	"name": "back-goatstats",
 	"scripts": {
 		"dev": "ts-node-dev -r tsconfig-paths/register src/index.ts",
-		"start": "node build/index.js",
+		"start": "tsc && node build/index.js",
+		"start:prod": "node build/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"tsc": "tsc"
 	},
