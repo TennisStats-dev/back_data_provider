@@ -48,6 +48,19 @@ const getPreMatch = async (api_id: number): Promise<IPreMatch & Document | null>
 		throw new Error("Error getting a pre match")
 	}
 }
+const getAllPreMatches = async (): Promise<Array<IPreMatch & Document | null>> => {
+	try {
+		const existingPopulatedMatch = await PreMatch.find().populate('tournament').populate('court').populate('home').populate('away')
+		
+		return existingPopulatedMatch
+	} catch (err) {
+		console.log(err)
+		logger.error("Error getting a pre match")
+		throw new Error("Error getting a pre match")
+	}
+}
+
+
 
 const getTournament = async (api_id: number): Promise<ITournament & Document | null> => {
 	try {
@@ -82,6 +95,7 @@ const GET = {
 	getPlayer,
 	getCourt,
 	getPreMatch,
+	getAllPreMatches,
 	getTournament,
 	getRequestsInfo,
 }
