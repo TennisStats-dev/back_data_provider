@@ -1,19 +1,17 @@
-
-
 const MATCH_STATUS = {
 	0: 0, // notStarted
 	1: 1, // inplay
-	2 : 2, // toBeFixed
-	3 : 3, // ended
-	4 : 4, // postponed
-	5 : 5, // cancelled
-	6 : 6, // walkover
-	7 : 7, // interrupted
-	8 : 8, // abandoned
-	9 : 9, // retired
-	10 : 10, // suspended
-	11 : 11, // decidedByFA
-	99 : 99, // removed
+	2: 2, // toBeFixed
+	3: 3, // ended
+	4: 4, // postponed
+	5: 5, // cancelled
+	6: 6, // walkover
+	7: 7, // interrupted
+	8: 8, // abandoned
+	9: 9, // retired
+	10: 10, // suspended
+	11: 11, // decidedByFA
+	99: 99, // removed
 }
 
 const MATCH_ROUND = {
@@ -29,12 +27,14 @@ const MATCH_ROUND = {
 	27: 27,
 	28: 28,
 	29: 29,
-	54: 54
+	44: 44,
+	54: 54,
+	62: 62,
 }
 
 const ODDS_MARKET = {
-	winner: "13_1",
-	firstSetWinner: "13_4",
+	winner: '13_1',
+	firstSetWinner: '13_4',
 }
 
 const BEST_OF_SETS = {
@@ -48,21 +48,17 @@ const PLAYERS = {
 }
 
 const GROUND = {
-	clay: {
-		format: 'Clay',
-	},
-	grass: {
-		format: 'Grass',
-	},
-	hard: {
-		format: 'Hardcourt outdoor',
-	},
-	indoor: {
-		format: 'Hardcourt indoor',
-	},
+	clay: 'Clay',
+	grass: 'Grass',
+	hardOutdoor: 'Hardcourt outdoor',
+	hardIndoor: 'Hardcourt indoor',
+	syntheticOutdoor: 'Synthetic outdoor',
+	syntheticIndoor: 'Synthetic indoor',
+	carpetOutdoor: 'Carpet outdoor',
+	carpetIndoor: 'Carpet indoor',
 }
 
-const CIRCUIT = ['ATP', 'WTA', 'ITF', 'Challenger', 'UTR', 'Davis Cup'] as const
+const CIRCUIT = ['ATP', 'WTA', 'ITF', 'Challenger', 'UTR', 'Davis Cup', 'Laver Cup'] as const
 
 export const CONSTANTS = {
 	matchStatus: MATCH_STATUS,
@@ -71,5 +67,5 @@ export const CONSTANTS = {
 	players: PLAYERS,
 	ground: GROUND,
 	circuit: CIRCUIT,
-	oddsMarketsRef: ODDS_MARKET
+	oddsMarketsRef: ODDS_MARKET,
 }

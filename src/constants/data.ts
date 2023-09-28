@@ -13,23 +13,10 @@ export const matchRound = {
 	[API.constants.matchRounds[27]]: 'QF',
 	[API.constants.matchRounds[28]]: 'SF',
 	[API.constants.matchRounds[29]]: 'F',
+	[API.constants.matchRounds[44]]: 'QR',
+	[API.constants.matchRounds[54]]: 'QR',
+	[API.constants.matchRounds[62]]: 'QR',
 } as const
-
-export const matchRound2 = {
-	14: 'QR1',
-	15: 'QR2',
-	16: 'QR3',
-	17: 'QR4',
-	19: 'QR',
-	23: 'R128',
-	24: 'R64',
-	25: 'R32',
-	26: 'R16',
-	27: 'QF',
-	28: 'SF',
-	29: 'F',
-}
-
 
 // Status description
 // export const matchStatus = {
@@ -106,13 +93,44 @@ export const matchStatus = {
 } as const
 
 export const grounds = {
-	[API.constants.ground.clay.format]: 'clay',
-	[API.constants.ground.grass.format]: 'grass',
-	[API.constants.ground.hard.format]: 'hard',
-	[API.constants.ground.indoor.format]: 'indoor',
+	[API.constants.ground.clay]: {
+		surface: 'Clay',
+		location: 'Outdoor'
+	},
+	[API.constants.ground.grass]: {
+		surface: 'Grass',
+		location: 'Outdoor'
+	},
+	[API.constants.ground.hardOutdoor]: {
+		surface: 'Hard',
+		location: 'Outdoor'
+	},
+	[API.constants.ground.hardIndoor]: {
+		surface: 'Hard',
+		location: 'Indoor'
+	},
+	[API.constants.ground.carpetOutdoor]: {
+		surface: 'Carpet',
+		location: 'Outdoor'
+	},
+	[API.constants.ground.carpetIndoor]: {
+		surface: 'Carpet',
+		location: 'Indoor'
+	},
+	[API.constants.ground.syntheticOutdoor]: {
+		surface: 'Carpet',
+		location: 'Outdoor'
+	},
+	[API.constants.ground.syntheticIndoor]: {
+		surface: 'Carpet',
+		location: 'Indoor'
+	},
 } as const
 
-export const groundArray = Array.from(Object.values(grounds))
+const groundsArray = Array.from(Object.values(grounds))
+
+export const surfaceArray = groundsArray.map(({surface}) => surface)
+export const locationArray = groundsArray.map(({location}) => location)
 
 export const gender = {
 	male: 'M',
@@ -144,13 +162,10 @@ export const type = {
 	women: 'W',
 	menDoubles: 'MD',
 	womenDoubles: 'WD',
-	davisCup: 'DC',
+	menMixed: 'M - MD',
 } as const
 
 export const typeArray = Array.from(Object.values(type))
-
-export const playerType = ['Player', 'Team'] as const
-
 
 export const bestOfSets = {
 	[API.constants.bestOfSets[3]]: 3,

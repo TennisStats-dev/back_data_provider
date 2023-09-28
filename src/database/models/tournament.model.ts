@@ -1,4 +1,4 @@
-import { bestOfSets, grounds } from '@constants/data'
+import { bestOfSets, locationArray, surfaceArray } from '@constants/data'
 import { type ITournament } from 'types/schemas'
 import { Schema, model } from 'mongoose'
 
@@ -9,7 +9,10 @@ const tournamentSchema = new Schema<ITournament>(
 		circuit: { type: String},
 		type:{ type: String, required: true },
 		best_of_sets: { type: Number, enum: Object.values(bestOfSets) },
-		ground: { type: String, enum: Object.values(grounds) },
+		ground: {
+			surface: { type: String, enum: Object.values(surfaceArray) },
+			location: { type: String, enum: Object.values(locationArray) },
+		},
 		city: { type: String },
 		cc: { type: String },
 	},
