@@ -107,11 +107,11 @@ export const updateMatchData = async (
 ): Promise<void> => {
 	if (matchDB.bet365_id === undefined && matchAPI.bet365_id !== undefined) {
 		matchDB.bet365_id = Number(matchAPI.bet365_id)
+	}
 
-		const preOdds = await preMatchOddsHandler(matchDB.bet365_id, matchDB.api_id)
-		if (preOdds !== null) {
-			matchDB.pre_odds = preOdds
-		}
+	const preOdds = await preMatchOddsHandler(Number(matchAPI.bet365_id), matchDB.api_id)
+	if (preOdds !== null) {
+		matchDB.pre_odds = preOdds
 	}
 
 	if (matchDB.est_time !== msToDateTime(matchAPI.time)) {
