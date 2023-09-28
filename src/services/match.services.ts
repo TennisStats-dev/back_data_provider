@@ -105,7 +105,6 @@ export const updateMatchData = async (
 	matchAPI: UpcomingMatches,
 	eventViewAPIResponse: MatchView,
 ): Promise<void> => {
-	
 	if (matchDB.bet365_id === undefined && matchAPI.bet365_id !== undefined) {
 		matchDB.bet365_id = Number(matchAPI.bet365_id)
 
@@ -119,8 +118,8 @@ export const updateMatchData = async (
 		matchDB.est_time = msToDateTime(matchAPI.time)
 	}
 
-	if (matchDB.round === undefined && eventViewAPIResponse.extra !== undefined) {
-		if (eventViewAPIResponse.extra?.round !== undefined) {
+	if (eventViewAPIResponse.extra !== undefined) {
+		if (matchDB.round === undefined && eventViewAPIResponse.extra?.round !== undefined) {
 			matchDB.round = getMatchRound(eventViewAPIResponse.extra.round, Number(matchAPI.id))
 		}
 
