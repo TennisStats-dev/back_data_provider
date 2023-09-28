@@ -3,12 +3,13 @@ import type { Request, Response } from 'express'
 import config from '@config/index'
 import { gender, type } from '@constants/data'
 import type { ICourt, IPlayer, IPreMatch, IPreOdds, ITournament } from 'types/schemas'
-import { createNewPreMatchObject, getUpcomingMatchesFromAPI } from '@services/match.services'
+import { createNewPreMatchObject, getUpcomingMatchesFromAPI, updateMatchData } from '@services/match.services'
 import { createNewPlayerObject, playerHandler } from '@services/player.services'
 import { courtHanlder } from '@services/court.services'
 import { tournamentHandler } from '@services/tournament.services'
-import { msToTime } from '@utils/msToTime'
 import { preMatchOddsHandler } from '@services/odds.services'
+import { msToDateTime } from '@utils/msToDateTime'
+import { msToStringTime } from '@utils/msToStringTime'
 
 export const saveUpcomingMatches = async (_req: Request, _res: Response): Promise<void> => {
 	try {
@@ -20,16 +21,23 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
 		const allUpcomingMatches = await getUpcomingMatchesFromAPI()
 		const upcomingMatchesDB = await config.database.services.getters.getAllPreMatches()
 
-		for (const match of allUpcomingMatches) {		
-			if(match.league.name.includes('Padel')) {
+		for (const match of allUpcomingMatches) {
+			if (match.league.name.includes('Padel')) {
 				continue
 			}
 			
-			if (upcomingMatchesDB.find((matchDB) => matchDB?.api_id === Number(match?.id)) !== undefined) {
+			const matchDB = upcomingMatchesDB.find((matchDB) => matchDB?.api_id === Number(match?.id))
+			const eventViewAPIResponse = await config.api.services.getEventView(Number(match.id))
+
+			if (matchDB !== null && matchDB !== undefined) {
+
+				await updateMatchData(matchDB, match, eventViewAPIResponse)
+
+				await matchDB.save()
+
 				continue
 			}
 
-			const eventViewAPIResponse = await config.api.services.getEventView(Number(match.id))
 
 			const tournament: ITournament = await tournamentHandler(
 				Number(match.id),
@@ -65,7 +73,7 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
 					home,
 					away,
 					match.time_status,
-					new Date(Number(match.time) * 1000),
+					msToDateTime(match.time),
 					pre_odds,
 				)
 
@@ -80,7 +88,7 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
 		}
 
 		const finishDate = new Date()
-		const duration = msToTime(finishDate.getTime() - startDate.getTime())
+		const duration = msToStringTime(finishDate.getTime() - startDate.getTime())
 		logger.info(
 			`${
 				newMatchesSaved.length

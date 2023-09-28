@@ -93,7 +93,7 @@ const getTournamentTypeAndGender = (
 	}
 }
 
-const getTournamentBestOfsets = (
+export const getTournamentBestOfsets = (
 	bestOfSetsInput: string | undefined,
 	tournamentName: string,
 	tournamentId: number,
@@ -113,7 +113,7 @@ const getTournamentBestOfsets = (
 	}
 }
 
-const getTournamentGround = (
+export const getTournamentGround = (
 	groundInput: string | undefined,
 	tournamentName: string,
 	tournamentId: number,
@@ -121,7 +121,7 @@ const getTournamentGround = (
 ): ITournament['ground'] => {
 
 	if (groundInput !== undefined) {
-		
+
 		// If to monitorize Synthetic surface tournaments and check the real surface.
 		if (groundInput === API.constants.ground.syntheticOutdoor || groundInput === API.constants.ground.syntheticIndoor) {
 			logger.warn(`There is a match with a synthetic surface for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`)

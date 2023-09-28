@@ -2,10 +2,7 @@ import type { EventOdds } from '@API/types/eventOdds'
 import config from '@config/index'
 import type { IPreOdds } from 'types/schemas'
 
-const getMatchPreOdds = (eventOddsInput: EventOdds): IPreOdds => {
-	
-    
-    
+const getMatchPreOdds = (eventOddsInput: EventOdds): IPreOdds => {    
     const WinnerObject = eventOddsInput.odds[config.api.constants.oddsMarketsRef.winner]
 
 	const firstSetWinnerObject = eventOddsInput.odds[config.api.constants.oddsMarketsRef.firstSetWinner]
