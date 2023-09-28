@@ -5,7 +5,7 @@ import { countriesCCArray } from '@constants/countries'
 import logger from '@config/logger'
 import { type } from '@constants/data'
 
-export const checkIfIsPlayer = (playerName: string): boolean => {
+const checkIfIsPlayer = (playerName: string): boolean => {
 	return !checkIfArrayIncludesSubstring(config.api.formats.Team, playerName)
 }
 
@@ -72,112 +72,119 @@ const createNewDoublesPlayerObject = (
 	return doublesPlayerData
 }
 
-export const playerHandler = async (
-	playersArray: IPlayer[],
-	tournamentType: Type,
-	matchGender: Gender,
-): Promise<IMatchPlayers> => {
+const saveDoublesPlayers = async (playersArray: IPlayer[], matchGender: Gender): Promise<IMatchPlayersObject> => {
 	const savedPlayers: IMatchPlayersObject = {
 		home: undefined,
 		away: undefined,
 	}
 
-	if (tournamentType === type.menDoubles || tournamentType === type.womenDoubles) {
-		const teamsPromises = playersArray.map(async (teamData, i) => {
-			const teamDB = await config.database.services.getters.getPlayer(Number(teamData.api_id))
+	const teamsPromises = playersArray.map(async (teamData, i) => {
+		const teamDB = await config.database.services.getters.getPlayer(Number(teamData.api_id))
 
-			if (teamDB !== null) {
-				if (i === 0) {
-					savedPlayers.home = teamDB
-				} else {
-					savedPlayers.away = teamDB
-				}
+		if (teamDB !== null) {
+			if (i === 0) {
+				savedPlayers.home = teamDB
 			} else {
-				const teamPlayers: IPlayer[] = []
+				savedPlayers.away = teamDB
+			}
+		} else {
+			const teamPlayers: IPlayer[] = []
 
-				const team1Data = await config.api.services.getTeamMembers(teamData.api_id)
+			const team1Data = await config.api.services.getTeamMembers(teamData.api_id)
 
-				const teamPlayersPromises = team1Data.map(async (player, j): Promise<void> => {
-					if (player !== null) {
-						const playerDB = await config.database.services.getters.getPlayer(Number(player.id))
+			const teamPlayersPromises = team1Data.map(async (player, j): Promise<void> => {
+				if (player !== null) {
+					const playerDB = await config.database.services.getters.getPlayer(Number(player.id))
 
-						if (playerDB != null) {
-							teamPlayers[j] = playerDB
-						} else {
-							const playerObject = createNewPlayerObject(Number(player.id), player.name, matchGender, player.cc)
-							const savedPlayer = await config.database.services.savers.saveNewPlayer(playerObject)
+					if (playerDB != null) {
+						teamPlayers[j] = playerDB
+					} else {
+						const playerObject = createNewPlayerObject(Number(player.id), player.name, matchGender, player.cc)
+						const savedPlayer = await config.database.services.savers.saveNewPlayer(playerObject)
 
-							teamPlayers[j] = savedPlayer
-						}
+						teamPlayers[j] = savedPlayer
 					}
-				})
-
-				await Promise.allSettled(teamPlayersPromises)
-
-				const doublesPlayerObject: IDoublesPlayer = createNewDoublesPlayerObject(
-					teamData.api_id,
-					teamData.name,
-					teamData.gender,
-					teamData.cc,
-					teamPlayers[0],
-					teamPlayers[1],
-				)
-
-				const savedDoublesPlayer = await config.database.services.savers.saveNewPlayer(doublesPlayerObject)
-
-				if (i === 0) {
-					savedPlayers.home = savedDoublesPlayer
-				} else {
-					savedPlayers.away = savedDoublesPlayer
 				}
-			}
-		})
+			})
 
-		await Promise.allSettled(teamsPromises)
-	} else if (tournamentType === type.davisCup) {
-		const playersPromises = playersArray.map(async (player, j): Promise<void> => {
-			const playerDB = await config.database.services.getters.getPlayer(Number(player.api_id))
+			await Promise.allSettled(teamPlayersPromises)
 
-			if (playerDB != null) {
-				if (j === 0) {
-					savedPlayers.home = playerDB
-				} else {
-					savedPlayers.away = playerDB
-				}
+			const doublesPlayerObject: IDoublesPlayer = createNewDoublesPlayerObject(
+				teamData.api_id,
+				teamData.name,
+				teamData.gender,
+				teamData.cc,
+				teamPlayers[0],
+				teamPlayers[1],
+			)
+
+			const savedDoublesPlayer = await config.database.services.savers.saveNewPlayer(doublesPlayerObject)
+
+			if (i === 0) {
+				savedPlayers.home = savedDoublesPlayer
 			} else {
-				const savedPlayer = await config.database.services.savers.saveNewPlayer(playersArray[j])
-
-				if (j === 0) {
-					savedPlayers.home = savedPlayer
-				} else {
-					savedPlayers.away = savedPlayer
-				}
+				savedPlayers.away = savedDoublesPlayer
 			}
-		})
+		}
+	})
 
-		await Promise.allSettled(playersPromises)
+	await Promise.allSettled(teamsPromises)
+
+	return savedPlayers
+}
+
+const savePlayer = async (playersArray: IPlayer[]): Promise<IMatchPlayersObject> => {
+	const savedPlayers: IMatchPlayersObject = {
+		home: undefined,
+		away: undefined,
+	}
+
+	const playersPromises = playersArray.map(async (player, j): Promise<void> => {
+		const playerDB = await config.database.services.getters.getPlayer(Number(player.api_id))
+
+		if (playerDB != null) {
+			if (j === 0) {
+				savedPlayers.home = playerDB
+			} else {
+				savedPlayers.away = playerDB
+			}
+		} else {
+			const savedPlayer = await config.database.services.savers.saveNewPlayer(playersArray[j])
+
+			if (j === 0) {
+				savedPlayers.home = savedPlayer
+			} else {
+				savedPlayers.away = savedPlayer
+			}
+		}
+	})
+
+	await Promise.allSettled(playersPromises)
+
+	return savedPlayers
+}
+
+export const playerHandler = async (
+	playersArray: IPlayer[],
+	tournamentType: Type,
+	matchGender: Gender,
+): Promise<IMatchPlayers> => {
+
+	let savedPlayers: IMatchPlayersObject = {
+		home: undefined,
+		away: undefined,
+	}
+
+	if (tournamentType === type.menDoubles || tournamentType === type.womenDoubles) {
+		savedPlayers = await saveDoublesPlayers(playersArray,matchGender)
+	} else if (tournamentType === type.menMixed) {
+		if(checkIfIsPlayer(playersArray[0].name)) {
+			savedPlayers = await savePlayer(playersArray)
+		} else {
+			savedPlayers = await saveDoublesPlayers(playersArray,matchGender)
+		}
 	} else {
-		const playersPromises = playersArray.map(async (player, j): Promise<void> => {
-			const playerDB = await config.database.services.getters.getPlayer(Number(player.api_id))
-
-			if (playerDB != null) {
-				if (j === 0) {
-					savedPlayers.home = playerDB
-				} else {
-					savedPlayers.away = playerDB
-				}
-			} else {
-				const savedPlayer = await config.database.services.savers.saveNewPlayer(playersArray[j])
-
-				if (j === 0) {
-					savedPlayers.home = savedPlayer
-				} else {
-					savedPlayers.away = savedPlayer
-				}
-			}
-		})
-
-		await Promise.allSettled(playersPromises)
+		savedPlayers = await savePlayer(playersArray)
 	}
 
 	if (savedPlayers.home !== undefined && savedPlayers.away !== undefined) {

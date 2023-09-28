@@ -5,6 +5,7 @@ import { checkIfArrayIncludesSubstring } from '@utils/checkArrayIncludesSubstrin
 import logger from '@config/logger'
 import { countriesArray, countriesCCArray } from '@constants/countries'
 import type { MatchView } from '@API/types/MatchView'
+import { API } from '@API/index'
 
 const checkIfIsDoubles = (tournamentName: string): boolean => {
 	return checkIfArrayIncludesSubstring(config.api.formats.doubleTournament, tournamentName)
@@ -53,7 +54,7 @@ const getTournamentTypeAndGender = (
 	if (checkIfIsMixedType(tournamentName)) {
 		return {
 			gender: gender.male,
-			type: type.davisCup,
+			type: type.menMixed,
 		}
 	}
 
@@ -118,7 +119,14 @@ const getTournamentGround = (
 	tournamentId: number,
 	matchId: number,
 ): ITournament['ground'] => {
+
 	if (groundInput !== undefined) {
+		
+		// If to monitorize Synthetic surface tournaments and check the real surface.
+		if (groundInput === API.constants.ground.syntheticOutdoor || groundInput === API.constants.ground.syntheticIndoor) {
+			logger.warn(`There is a match with a synthetic surface for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`)
+		}
+
 		const ground = grounds[groundInput]
 
 		if (ground === undefined) {
@@ -127,6 +135,7 @@ const getTournamentGround = (
 			)
 			return undefined
 		}
+
 		return ground
 	}
 	return undefined

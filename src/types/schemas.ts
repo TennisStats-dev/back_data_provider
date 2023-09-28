@@ -4,14 +4,14 @@ import type {
 	matchRound,
 	hours,
 	genderArray,
-	groundArray,
 	gameResultArray,
 	typeArray,
 	bestOfSets,
 	consistencyArray,
 	playerOptionArray,
 	circuitArray,
-	playerType,
+	surfaceArray,
+	locationArray,
 } from '@constants/data'
 
 export type CountriesCC = (typeof countriesCC)[number]
@@ -22,15 +22,15 @@ export type Round = (typeof matchRound)[number]
 
 export type Gender = (typeof genderArray)[number]
 
-export type Ground = (typeof groundArray)[number]
+export type Surface = (typeof surfaceArray)[number]
+
+export type Location = (typeof locationArray)[number]
 
 export type GameResult = (typeof gameResultArray)[number]
 
 export type Circuit = (typeof circuitArray)[number]
 
 export type Type = (typeof typeArray)[number]
-
-export type PlayerType = (typeof playerType)[number]
 
 export type BestOfSets = (typeof bestOfSets)[number]
 
@@ -54,7 +54,10 @@ export interface ITournament {
 	circuit?: Circuit
 	type: Type
 	best_of_sets?: BestOfSets
-	ground?: Ground
+	ground?: {
+		surface: Surface
+		location: Location
+	}
 	city?: string
 	cc?: string
 }
