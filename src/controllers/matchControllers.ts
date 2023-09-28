@@ -25,6 +25,8 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
 			if (match.league.name.includes('Padel')) {
 				continue
 			}
+
+			
 			
 			const matchDB = upcomingMatchesDB.find((matchDB) => matchDB?.api_id === Number(match?.id))
 			const eventViewAPIResponse = await config.api.services.getEventView(Number(match.id))
