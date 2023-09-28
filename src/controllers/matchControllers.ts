@@ -20,22 +20,16 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
 		const allUpcomingMatches = await getUpcomingMatchesFromAPI()
 		const upcomingMatchesDB = await config.database.services.getters.getAllPreMatches()
 
-		console.log(allUpcomingMatches.length)
-		console.log(upcomingMatchesDB.length)
-
-		for (const match of allUpcomingMatches) {
-			// if ((await config.database.services.getters.getPreMatch(Number(match.id))) !== null) {
-			// 	continue
-			// }
+		for (const match of allUpcomingMatches) {		
+			if(match.league.name.includes('Padel')) {
+				continue
+			}
 			
 			if (upcomingMatchesDB.find((matchDB) => matchDB?.api_id === Number(match?.id)) !== undefined) {
 				continue
 			}
 
-
 			const eventViewAPIResponse = await config.api.services.getEventView(Number(match.id))
-
-
 
 			const tournament: ITournament = await tournamentHandler(
 				Number(match.id),
