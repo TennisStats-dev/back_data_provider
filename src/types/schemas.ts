@@ -67,13 +67,12 @@ export interface ICourt {
 	name: string
 }
 
-interface IMatchStats {
-	result: Array<`${number}-${number}`>
-	aces: [number, number]
-	df: [number, number]
-	win_1st_serve: [number, number]
-	bp: [number, number]
-	consistency: Consistency
+export interface IMatchStats {
+	result: string[] | 'home' | 'away' | 'cancelled'
+	aces?: [number, number]
+	df?: [number, number]
+	win_1st_serve?: [number, number]
+	bp?: [number, number]
 }
 
 interface IPbP {
@@ -85,17 +84,15 @@ interface IPbP {
 	time?: Date
 }
 
-interface IGameStats {
+export interface IGameStats {
 	summary: string
-	service: PlayerOption
-	winner: PlayerOption
 	won_points?: [number, number]
 	total_bp?: number
 	total_aces?: number
 	points?: IPbP[]
 }
 
-interface ISetStats {
+export interface ISetStats {
 	number: number
 	games_stats: IGameStats[]
 }
@@ -149,10 +146,10 @@ export interface IPreMatch {
 }
 
 export interface IMatch extends IPreMatch {
-	b365_start_time?: Date
-	b365_end_time?: Date
+	// b365_start_time?: Date
+	// b365_end_time?: Date
 	match_stats: IMatchStats
-	sets_stats: ISetStats[]
+	sets_stats?: ISetStats[]
 }
 
 export interface IPlayerRanking {

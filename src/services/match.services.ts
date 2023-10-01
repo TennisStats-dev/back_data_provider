@@ -1,7 +1,20 @@
 import config from '@config/index'
 import logger from '@config/logger'
 import { matchRound, matchStatus } from '@constants/data'
-import type { ICourt, IDoublesPlayer, IPlayer, IPreMatch, IPreOdds, ITournament, Status, Type } from 'types/schemas'
+import type {
+	ICourt,
+	IDoublesPlayer,
+	IGameStats,
+	IMatch,
+	IMatchStats,
+	IPlayer,
+	IPreMatch,
+	IPreOdds,
+	ISetStats,
+	ITournament,
+	Status,
+	Type,
+} from 'types/schemas'
 import type { UpcomingMatches } from '@API/types/upcomingMatches'
 import { preMatchOddsHandler } from './odds.services'
 import { msToDateTime } from '@utils/msToDateTime'
@@ -114,6 +127,10 @@ export const updateMatchData = async (
 		matchDB.pre_odds = preOdds
 	}
 
+	if (matchDB.status !== Number(matchAPI.time_status)) {
+		matchDB.status = getMatchStatus(Number(matchAPI.time_status), matchDB.api_id)
+	}
+
 	if (matchDB.est_time !== msToDateTime(matchAPI.time)) {
 		matchDB.est_time = msToDateTime(matchAPI.time)
 	}
@@ -163,4 +180,72 @@ export const updateMatchData = async (
 			await tournamentDB.save()
 		}
 	}
+}
+
+export const createNewEndedMatchObject = (
+	status: string,
+	preMatchData: IPreMatch,
+	resultData: string,
+	acesData: string[] | undefined,
+	dfData: string[] | undefined,
+	win_1st_serveData: string[] | undefined,
+	bpData: string[] | undefined,
+	setStatsData: Array<{id: string, text: string}> | undefined,
+): IMatch => {
+
+	let resultFormatted: string[] = []
+
+	if (Number(status) === 5) {
+		resultFormatted = ['cancelled']
+	} else {
+		resultFormatted = resultData.split(',')
+	}
+
+	const endedMatchData: IMatch = Object.assign({
+		match_stats: {
+			result: resultFormatted,
+		},
+	}, preMatchData)
+
+	if(acesData !== undefined) {
+		endedMatchData.match_stats.aces = acesData.map(ace => Number(ace)) as IMatchStats['aces']
+	}
+
+	if(dfData !== undefined) {
+		endedMatchData.match_stats.df = dfData.map(df => Number(df)) as IMatchStats['df']
+	}
+	if(win_1st_serveData !== undefined) {
+		endedMatchData.match_stats.win_1st_serve = win_1st_serveData.map(perCent => Number(perCent))as IMatchStats['win_1st_serve']
+	}
+
+	if(bpData !== undefined) {
+		endedMatchData.match_stats.bp = bpData.map(perCent => Number(perCent))as IMatchStats['bp']
+	}
+	
+	const setStats: ISetStats[] = []
+
+
+	
+	if (setStatsData !== undefined && setStatsData.length > 0) {
+		const totalGamesPerSet = resultFormatted.map(stringRes => {
+			return stringRes.split('-').map(stringRes => Number(stringRes)).reduce((a,b): number => a+b)
+		})
+
+		totalGamesPerSet.forEach((gamesSet, index) => {
+			const gameStats = setStatsData.splice(0, gamesSet).map((game): IGameStats => {
+				return {
+					summary: game.text
+				}
+			})
+			
+			setStats.push({
+				number: index+1,
+				games_stats: gameStats
+			})
+		})
+	}
+
+	endedMatchData.sets_stats = setStats
+
+	return endedMatchData
 }

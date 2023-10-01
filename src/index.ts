@@ -4,8 +4,10 @@ import 'dotenv/config'
 import express from 'express'
 import config from './config'
 import logger from '@config/logger'
-import { saveUpcomingMatches } from '@controllers/matchControllers'
+// import { saveUpcomingMatches } from '@controllers/saveUpcomingMatchesController'
 import { getMatchDetails } from './test'
+import { saveEndedMatches } from '@controllers/saveEndedMatchesController'
+import { saveUpcomingMatches } from '@controllers/saveUpcomingMatchesController'
 
 export const app = express()
 app.use(express.json())
@@ -15,7 +17,7 @@ app.get('/ping', (_, res) => {
 	res.send('pong')
 })
 
-app.get('/upcomingmatches', saveUpcomingMatches)
+app.get('/upcomingmatches', saveUpcomingMatches, saveEndedMatches)
 
 app.get('/eventview/:id', getMatchDetails)
 

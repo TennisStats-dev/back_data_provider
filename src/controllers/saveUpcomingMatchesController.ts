@@ -1,5 +1,5 @@
 import logger from '@config/logger'
-import type { Request, Response } from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import config from '@config/index'
 import { gender, type } from '@constants/data'
 import type { ICourt, IPlayer, IPreMatch, IPreOdds, ITournament } from 'types/schemas'
@@ -10,35 +10,48 @@ import { tournamentHandler } from '@services/tournament.services'
 import { preMatchOddsHandler } from '@services/odds.services'
 import { msToDateTime } from '@utils/msToDateTime'
 import { msToStringTime } from '@utils/msToStringTime'
+import type { Document } from 'mongoose'
 
-export const saveUpcomingMatches = async (_req: Request, _res: Response): Promise<void> => {
+export const saveUpcomingMatches = async (_req: Request, _res: Response, next: NextFunction): Promise<void> => {
 	try {
+		logger.info('-----------------------------------------------')
 		const startDate = new Date()
 		logger.info(`Save upcoming matches started at: ${startDate.toString()}`)
 
 		const newMatchesSaved: IPreMatch[] = []
+		let preMatchUpdated: number = 0
+		let preMatchPadel: number = 0
 
-		const allUpcomingMatches = await getUpcomingMatchesFromAPI()
+		const allUpcomingMatchesAPI = await getUpcomingMatchesFromAPI()
 		const upcomingMatchesDB = await config.database.services.getters.getAllPreMatches()
 
-		for (const match of allUpcomingMatches) {
+		for (const match of allUpcomingMatchesAPI) {
 			if (match.league.name.includes('Padel')) {
+				preMatchPadel++
 				continue
 			}
 
-			
-			
-			const matchDB = upcomingMatchesDB.find((matchDB) => matchDB?.api_id === Number(match?.id))
+			// Temporary logger to monitorize which types have the upcoming matches coming from API
+			if(match.time_status !== '0') {
+				logger.warn(`The match with id ${match.id} has a status of ${match.time_status}`)
+			}
+
 			const eventViewAPIResponse = await config.api.services.getEventView(Number(match.id))
 
+			let matchDB: (IPreMatch & Document<any, any, any>) | undefined
+			
+			if (upcomingMatchesDB !== null) {
+				matchDB = upcomingMatchesDB.find((matchDB) => matchDB?.api_id === Number(match?.id))
+			}
+
 			if (matchDB !== null && matchDB !== undefined) {
-
 				await updateMatchData(matchDB, match, eventViewAPIResponse)
-
 				await matchDB.save()
-
+				preMatchUpdated++
 				continue
 			}
+
+
 
 
 			const tournament: ITournament = await tournamentHandler(
@@ -91,12 +104,14 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response): Promis
 
 		const finishDate = new Date()
 		const duration = msToStringTime(finishDate.getTime() - startDate.getTime())
-		logger.info(
-			`${
-				newMatchesSaved.length
-			} matches have been saved - The process finished at: ${finishDate.toString()}, TOTAL DURATION :', ${duration}`,
+		logger.info(`${newMatchesSaved.length} SAVED pre matches`)	
+		logger.info(`${preMatchPadel} AVOIDED Padel pre matches`)
+		logger.info(`${preMatchUpdated} UPDATED pre matches`)
+		logger.info(`The process finished at: ${finishDate.toString()}, TOTAL DURATION :', ${duration}`,
 		)
 	} catch (err) {
 		logger.error(err)
 	}
+
+	next()
 }

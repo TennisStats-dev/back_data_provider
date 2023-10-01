@@ -5,8 +5,9 @@ import RequestsInfo from '@database/models/requestsInfo.model'
 import Tournament from '@database/models/tournament.model'
 import { hours } from '@constants/data'
 import type { Document } from 'mongoose'
-import type { ICourt, IPlayer, IPreMatch, IRequestsInfo, ITournament } from 'types/schemas'
+import type { ICourt, IMatch, IPlayer, IPreMatch, IRequestsInfo, ITournament } from 'types/schemas'
 import logger from '@config/logger'
+import Match from '@database/models/match.model'
 
 const saveNewCourt = async (courtData: ICourt): Promise<ICourt & Document> => {
 	try {
@@ -64,6 +65,20 @@ const saveNewPreMatch = async (matchData: IPreMatch): Promise<IPreMatch & Docume
 	}
 }
 
+const saveNewEndedMatch = async (matchData: IMatch): Promise<IMatch & Document> => {
+	try {
+		const newEndedMatch = new Match(matchData)
+
+		const savedEndedMatch = await newEndedMatch.save()
+
+		return savedEndedMatch
+	} catch (err) {
+		console.log(err)
+		logger.error("Error when saving a new ended match")
+		throw new Error("Error when saving a new ended match")
+	}
+}
+
 const saveNewRequestInfo = async (formattedDate: string): Promise<IRequestsInfo & Document> => {
 	try {
 		const requestInfoData: IRequestsInfo = {
@@ -93,6 +108,7 @@ const SAVE = {
 	saveNewPlayer,
 	saveNewTournament,
 	saveNewPreMatch,
+	saveNewEndedMatch
 }
 
 export default SAVE
