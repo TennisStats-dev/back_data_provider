@@ -5,6 +5,7 @@ import type { TeamMembers, TeamMembersRes } from '@API/types/teamMembers'
 import type { UpcomingMatchesRes } from '@API/types/upcomingMatches'
 import type { EventOdds, EventOddsRes } from './types/eventOdds'
 import { createError } from '@utils/createError'
+import type { EndedMatchesRes } from './types/endedMatches'
 
 const getUpcomingMatches = async (page: number = 1): Promise<UpcomingMatchesRes> => {
 	try {
@@ -22,6 +23,27 @@ const getUpcomingMatches = async (page: number = 1): Promise<UpcomingMatchesRes>
 		throw createError(err, 'get upcoming matches')
 	}
 }
+
+const getEndedMatches = async (page: number = 1): Promise<EndedMatchesRes> => {
+	try {
+		const res = await axios.get(`${config.api.endpoints.baseURLs.endedMatches}`, {
+			params: {
+				[config.api.endpoints.params.keys.token]: config.api.endpoints.params.values.token,
+				[config.api.endpoints.params.keys.sport_id]: config.api.endpoints.params.values.tennisID,
+				[config.api.endpoints.params.keys.page]: page,
+			},
+		})
+
+		const endedMatches: EndedMatchesRes = res.data
+
+		return endedMatches
+	} catch (err) {
+		console.log(err)
+		throw createError(err, 'get ended matches')
+	}
+}
+
+
 
 const getEventView = async (api_id: number): Promise<MatchView> => {
 	try {
@@ -79,9 +101,12 @@ const getMatchOdds = async (api_id: number): Promise<EventOdds> => {
 	}
 }
 
+
+
 export const SERVICES = {
 	getUpcomingMatches,
 	getEventView,
 	getTeamMembers,
-	getMatchOdds
+	getMatchOdds,
+	getEndedMatches
 }

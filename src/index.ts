@@ -5,10 +5,12 @@ import express from 'express'
 import config from './config'
 import logger from '@config/logger'
 // import { saveUpcomingMatches } from '@controllers/saveUpcomingMatchesController'
-import { getMatchDetails } from './test'
-import { saveEndedMatches } from '@controllers/saveEndedMatchesController'
+import { getEndedMatchDetails, getPreMatchDetails } from './test'
+import { saveEndedMatchesFromPrematches } from '@controllers/saveEndedMatchesFromPreMatchesController'
 import { saveUpcomingMatches } from '@controllers/saveUpcomingMatchesController'
 import { updateTournamentCircuit } from '@controllers/updateTournamentData'
+import { saveAllEndedMatches } from '@controllers/saveAllEndedMatchesController'
+import { udpateEndedMatchesResult } from '@controllers/updateEndedMatchResult'
 
 export const app = express()
 app.use(express.json())
@@ -18,11 +20,16 @@ app.get('/ping', (_, res) => {
 	res.send('pong')
 })
 
-app.get('/upcomingmatches', saveUpcomingMatches, saveEndedMatches)
+app.get('/saveupcomingmatches', saveUpcomingMatches, saveEndedMatchesFromPrematches, udpateEndedMatchesResult)
 
-app.get('/eventview/:id', getMatchDetails)
+app.get('/saveallendedmatches', saveAllEndedMatches)
 
 app.get('/updatetournaments', updateTournamentCircuit)
+
+app.get('/eventview/upcoming/:id', getPreMatchDetails)
+
+app.get('/eventview/ended/:id', getEndedMatchDetails)
+
 
 config.database.connection.connectDB()
 

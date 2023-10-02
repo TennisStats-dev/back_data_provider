@@ -5,9 +5,11 @@ import RequestsInfo from '@database/models/requestsInfo.model'
 import Tournament from '@database/models/tournament.model'
 import { hours } from '@constants/data'
 import type { Document } from 'mongoose'
-import type { ICourt, IMatch, IPlayer, IPreMatch, IRequestsInfo, ITournament } from 'types/schemas'
+import type { ICourt, IMatch, IMatchNotFound, IPlayer, IPreMatch, IRequestsInfo, IResultIssue, ITournament } from 'types/schemas'
 import logger from '@config/logger'
 import Match from '@database/models/match.model'
+import ResultIssue from '@database/models/resultIssue.model'
+import MatchNotFound from '@database/models/matchNotFound'
 
 const saveNewCourt = async (courtData: ICourt): Promise<ICourt & Document> => {
 	try {
@@ -17,8 +19,8 @@ const saveNewCourt = async (courtData: ICourt): Promise<ICourt & Document> => {
 		return savedCourt
 	} catch (err) {
 		console.log(err)
-		logger.error("Error when saving a new court")
-		throw new Error("Error when saving a new court")
+		logger.error('Error when saving a new court')
+		throw new Error('Error when saving a new court')
 	}
 }
 
@@ -31,8 +33,8 @@ const saveNewPlayer = async (playerData: IPlayer): Promise<IPlayer & Document> =
 		return savedPlayer
 	} catch (err) {
 		console.log(err)
-		logger.error("Error when saving a new player")
-		throw new Error("Error when saving a new player")
+		logger.error('Error when saving a new player')
+		throw new Error('Error when saving a new player')
 	}
 }
 
@@ -46,8 +48,8 @@ const saveNewTournament = async (tournamentData: ITournament): Promise<ITourname
 		return savedTournament
 	} catch (err: any) {
 		console.log(err)
-		logger.error("Error when saving a new tournament")
-		throw new Error("Error when saving a new tournament")
+		logger.error('Error when saving a new tournament')
+		throw new Error('Error when saving a new tournament')
 	}
 }
 
@@ -60,8 +62,8 @@ const saveNewPreMatch = async (matchData: IPreMatch): Promise<IPreMatch & Docume
 		return savedPreMatch
 	} catch (err) {
 		console.log(err)
-		logger.error("Error when saving a new pre match")
-		throw new Error("Error when saving a new pre match")
+		logger.error('Error when saving a new pre match')
+		throw new Error('Error when saving a new pre match')
 	}
 }
 
@@ -74,8 +76,32 @@ const saveNewEndedMatch = async (matchData: IMatch): Promise<IMatch & Document> 
 		return savedEndedMatch
 	} catch (err) {
 		console.log(err)
-		logger.error("Error when saving a new ended match")
-		throw new Error("Error when saving a new ended match")
+		logger.error('Error when saving a new ended match')
+		throw new Error('Error when saving a new ended match')
+	}
+}
+
+const saveNewResultIssue = async (issueData: IResultIssue): Promise<void> => {
+	try {
+		const newIssue = new ResultIssue(issueData)
+
+		await newIssue.save()
+	} catch (err) {
+		console.log(err)
+		logger.error('Error when saving a new match issue')
+		throw new Error('Error when saving a new match issue')
+	}
+}
+
+const saveNewMatchNotFound = async (matchData: IMatchNotFound): Promise<void> => {
+	try {
+		const newMatchNotFound = new MatchNotFound(matchData)
+
+		await newMatchNotFound.save()
+	} catch (err) {
+		console.log(err)
+		logger.error('Error when saving a new match issue')
+		throw new Error('Error when saving a new match issue')
 	}
 }
 
@@ -97,8 +123,8 @@ const saveNewRequestInfo = async (formattedDate: string): Promise<IRequestsInfo 
 		return savedRequestInfoDay
 	} catch (err) {
 		console.log(err)
-		logger.error("Error when saving a new requests info")
-		throw new Error("Error when saving a new requests info")
+		logger.error('Error when saving a new requests info')
+		throw new Error('Error when saving a new requests info')
 	}
 }
 
@@ -108,7 +134,9 @@ const SAVE = {
 	saveNewPlayer,
 	saveNewTournament,
 	saveNewPreMatch,
-	saveNewEndedMatch
+	saveNewEndedMatch,
+	saveNewResultIssue,
+	saveNewMatchNotFound,
 }
 
 export default SAVE

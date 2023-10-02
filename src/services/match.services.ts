@@ -5,6 +5,7 @@ import type {
 	ICourt,
 	IDoublesPlayer,
 	IGameStats,
+	IResultIssue,
 	IMatch,
 	IMatchStats,
 	IPlayer,
@@ -22,6 +23,7 @@ import type { MatchView } from '@API/types/MatchView'
 import { courtHanlder } from './court.services'
 import { getTournamentBestOfsets, getTournamentGround } from './tournament.services'
 import { countriesArray } from '@constants/countries'
+import type { EndedMatches } from '@API/types/endedMatches'
 
 export const checkIfIsTennisMatch = (sportId: number): boolean => {
 	return sportId === 13
@@ -182,7 +184,33 @@ export const updateMatchData = async (
 	}
 }
 
-export const createNewEndedMatchObject = (
+export const getformattedResult = async (resultData: string, status: string, matchID: number): Promise<IMatchStats['result']> => {
+	if (Number(status) === config.api.constants.matchStatus['5']) {
+		return 'cancelled'
+	} else if (
+		(Number(status) === config.api.constants.matchStatus['3'] ||
+			Number(status) === config.api.constants.matchStatus['6']) &&
+		resultData === null
+	) {
+		const details = `API ISSUE: Result (ss) is NULL for match ${matchID} with status: ${status}`
+		logger.warn(details)
+
+		const issueObject: IResultIssue = {
+			matchId: Number(matchID),
+			status: getMatchStatus(Number(status), Number(matchID)),
+			details,
+		}
+		await config.database.services.savers.saveNewResultIssue(issueObject)
+
+		return 'Not updated'
+	} else if (resultData === 'home' || resultData === 'away') {
+		return resultData
+	} else {
+		return resultData.split(',')
+	}
+}
+
+export const createNewEndedMatchObject = async (
 	status: string,
 	preMatchData: IPreMatch,
 	resultData: string,
@@ -190,62 +218,79 @@ export const createNewEndedMatchObject = (
 	dfData: string[] | undefined,
 	win_1st_serveData: string[] | undefined,
 	bpData: string[] | undefined,
-	setStatsData: Array<{id: string, text: string}> | undefined,
-): IMatch => {
+	setStatsData: Array<{ id: string; text: string }> | undefined,
+): Promise<IMatch> => {
 
-	let resultFormatted: string[] = []
+	const resultFormatted = await getformattedResult(resultData, status, preMatchData.api_id)
 
-	if (Number(status) === 5) {
-		resultFormatted = ['cancelled']
-	} else {
-		resultFormatted = resultData.split(',')
-	}
-
-	const endedMatchData: IMatch = Object.assign({
-		match_stats: {
-			result: resultFormatted,
+	const endedMatchData: IMatch = Object.assign(
+		{
+			match_stats: {
+				result: resultFormatted,
+			},
 		},
-	}, preMatchData)
+		preMatchData,
+	)
 
-	if(acesData !== undefined) {
-		endedMatchData.match_stats.aces = acesData.map(ace => Number(ace)) as IMatchStats['aces']
-	}
-
-	if(dfData !== undefined) {
-		endedMatchData.match_stats.df = dfData.map(df => Number(df)) as IMatchStats['df']
-	}
-	if(win_1st_serveData !== undefined) {
-		endedMatchData.match_stats.win_1st_serve = win_1st_serveData.map(perCent => Number(perCent))as IMatchStats['win_1st_serve']
+	if (acesData !== undefined) {
+		endedMatchData.match_stats.aces = acesData.map((ace) => Number(ace)) as IMatchStats['aces']
 	}
 
-	if(bpData !== undefined) {
-		endedMatchData.match_stats.bp = bpData.map(perCent => Number(perCent))as IMatchStats['bp']
+	if (dfData !== undefined) {
+		endedMatchData.match_stats.df = dfData.map((df) => Number(df)) as IMatchStats['df']
 	}
-	
+	if (win_1st_serveData !== undefined) {
+		endedMatchData.match_stats.win_1st_serve = win_1st_serveData.map((perCent) =>
+			Number(perCent),
+		) as IMatchStats['win_1st_serve']
+	}
+
+	if (bpData !== undefined) {
+		endedMatchData.match_stats.bp = bpData.map((perCent) => Number(perCent)) as IMatchStats['bp']
+	}
+
 	const setStats: ISetStats[] = []
 
-
-	
-	if (setStatsData !== undefined && setStatsData.length > 0) {
-		const totalGamesPerSet = resultFormatted.map(stringRes => {
-			return stringRes.split('-').map(stringRes => Number(stringRes)).reduce((a,b): number => a+b)
+	if (Array.isArray(resultFormatted) && setStatsData !== undefined && setStatsData.length > 0) {
+		const totalGamesPerSet = resultFormatted.map((stringRes) => {
+			return stringRes
+				.split('-')
+				.map((stringRes) => Number(stringRes))
+				.reduce((a, b): number => a + b)
 		})
 
 		totalGamesPerSet.forEach((gamesSet, index) => {
 			const gameStats = setStatsData.splice(0, gamesSet).map((game): IGameStats => {
 				return {
-					summary: game.text
+					summary: game.text,
 				}
 			})
-			
+
 			setStats.push({
-				number: index+1,
-				games_stats: gameStats
+				number: index + 1,
+				games_stats: gameStats,
 			})
 		})
+
+		endedMatchData.sets_stats = setStats
 	}
 
-	endedMatchData.sets_stats = setStats
-
 	return endedMatchData
+}
+
+export const getAllEndedMatchesFromAPI = async (): Promise<EndedMatches[]> => {
+	const allEndedMatches: EndedMatches[] = []
+	let page = 1
+
+	const EndedMatchesApiResponse = await config.api.services.getEndedMatches(page)
+	allEndedMatches.push(...EndedMatchesApiResponse.results)
+
+	do {
+		page += 1
+		console.log(page)
+		const apiResponse = await config.api.services.getEndedMatches(page)
+		allEndedMatches.push(...apiResponse.results)
+	} while (page < 100)
+
+	return allEndedMatches
 }

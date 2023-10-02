@@ -10,7 +10,7 @@ const MatchSchema = new Schema<IMatch>(
 		round: { type: String },
 		tournament: {
 			type: Schema.Types.ObjectId,
-			ref: 'Torunament',
+			ref: 'Tournament',
 			required: true,
 		},
 		court: { type: Schema.Types.ObjectId, ref: 'Court' },

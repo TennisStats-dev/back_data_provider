@@ -68,7 +68,7 @@ export interface ICourt {
 }
 
 export interface IMatchStats {
-	result: string[] | 'home' | 'away' | 'cancelled'
+	result: string[] | 'home' | 'away' | 'cancelled' | 'Not updated'
 	aces?: [number, number]
 	df?: [number, number]
 	win_1st_serve?: [number, number]
@@ -185,3 +185,27 @@ export interface IMatchPlayersObject {
 	home: IPlayer | IDoublesPlayer | undefined
 	away: IPlayer | IDoublesPlayer | undefined
 }
+
+export interface IResultIssue {
+	matchId: number,
+	status: Status, 
+	details: string
+}
+
+export interface IMatchNotFound {
+	matchId: number,
+	home: {
+		api_id: number,
+		name: string,
+	}
+	away: {
+		api_id: number,
+		name: string,
+	}
+	tournament: {
+		api_id: number,
+		name: string,
+	},
+	details: string,
+}
+
