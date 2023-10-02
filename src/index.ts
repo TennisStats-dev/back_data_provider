@@ -8,6 +8,7 @@ import logger from '@config/logger'
 import { getMatchDetails } from './test'
 import { saveEndedMatches } from '@controllers/saveEndedMatchesController'
 import { saveUpcomingMatches } from '@controllers/saveUpcomingMatchesController'
+import { updateTournamentCircuit } from '@controllers/updateTournamentData'
 
 export const app = express()
 app.use(express.json())
@@ -20,6 +21,8 @@ app.get('/ping', (_, res) => {
 app.get('/upcomingmatches', saveUpcomingMatches, saveEndedMatches)
 
 app.get('/eventview/:id', getMatchDetails)
+
+app.get('/updatetournaments', updateTournamentCircuit)
 
 config.database.connection.connectDB()
 

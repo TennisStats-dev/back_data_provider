@@ -23,10 +23,10 @@ const checkIfIsMen = (tournamentName: string): boolean => {
 	return checkIfArrayIncludesSubstring(config.api.formats.menTournament, tournamentName)
 }
 
-const getTournamentCircuit = (
+export const getTournamentCircuit = (
 	tournamentName: string,
 	tournamentId: number,
-	matchId: number,
+	matchId?: number,
 ): ITournament['circuit'] | undefined => {
 	let circuitIndex: number | undefined
 

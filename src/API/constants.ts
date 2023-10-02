@@ -58,7 +58,7 @@ const GROUND = {
 	carpetIndoor: 'Carpet indoor',
 }
 
-const CIRCUIT = ['ATP', 'WTA', 'ITF', 'Challenger', 'UTR', 'Davis Cup', 'Laver Cup'] as const
+const CIRCUIT = ['ATP', 'WTA', 'ITF', 'Challenger', 'UTR', 'Davis Cup', 'Laver Cup', 'UK Pro League'] as const
 
 export const CONSTANTS = {
 	matchStatus: MATCH_STATUS,

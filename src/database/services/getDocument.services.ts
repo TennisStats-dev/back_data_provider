@@ -60,8 +60,6 @@ const getAllPreMatches = async (): Promise<Array<IPreMatch & Document> | null> =
 	}
 }
 
-
-
 const getTournament = async (api_id: number): Promise<ITournament & Document | null> => {
 	try {
 		const existingTorunament = await Tournament.findOne({
@@ -75,6 +73,19 @@ const getTournament = async (api_id: number): Promise<ITournament & Document | n
 		throw new Error("Error getting a tournament")
 	}
 }
+const getAllTournaments = async (): Promise<Array<ITournament & Document> | null> => {
+	try {
+		const existingTorunaments = await Tournament.find()
+
+		return existingTorunaments
+	} catch (err) {
+		console.log(err)
+		logger.error("Error getting all tournaments")
+		throw new Error("Error getting all tournaments")
+	}
+}
+
+
 
 const getRequestsInfo = async (formattedDate: string): Promise<IRequestsInfo & Document | null> => {
 	try {
@@ -97,6 +108,7 @@ const GET = {
 	getPreMatch,
 	getAllPreMatches,
 	getTournament,
+	getAllTournaments,
 	getRequestsInfo,
 }
 
