@@ -184,7 +184,13 @@ export const updateMatchData = async (
 	}
 }
 
-export const getformattedResult = async (resultData: string, home: IPlayer, away: IPlayer, status: string, matchID: number): Promise<IMatchStats['result']> => {
+export const getformattedResult = async (
+	resultData: string,
+	home: IPlayer | IDoublesPlayer,
+	away: IPlayer | IDoublesPlayer,
+	status: string,
+	matchId: number,
+): Promise<IMatchStats['result']> => {
 	if (Number(status) === config.api.constants.matchStatus['5']) {
 		return 'cancelled'
 	} else if (
@@ -192,29 +198,77 @@ export const getformattedResult = async (resultData: string, home: IPlayer, away
 			Number(status) === config.api.constants.matchStatus['6']) &&
 		resultData === null
 	) {
-		const details = `API ISSUE: Result (ss) is NULL for match ${matchID} with status: ${status}`
-		logger.warn(details)
-
-		const resultIssueObject: IResultIssue = {
-			matchId: Number(matchID),
-			home,
-			away,
-			status: getMatchStatus(Number(status), Number(matchID)),
-			details,
-		}
-		await config.database.services.savers.saveNewResultIssue(resultIssueObject)
-
+		const details = `API ISSUE: Result (ss) is NULL for match ${matchId} with status: ${status}`
+		await saveResultIssue(details, status, matchId, home, away)
 		return 'Not updated'
 	} else if (resultData === 'home' || resultData === 'away') {
 		return resultData
 	} else {
-		return resultData.split(',')
+		const arrayOfSets = resultData.split(',')
+		let resultIsCorrect = true
+
+		if (arrayOfSets.length < 2) {
+			resultIsCorrect = false
+		}
+
+		arrayOfSets.forEach((set, index) => {
+			const arrayOfGames = set.split('-')
+			if (index !== arrayOfSets.length - 1) {
+				if (Number(arrayOfGames[0]) < 6 && Number(arrayOfGames[1]) < 6) {
+					resultIsCorrect = false
+				}
+			} else {
+				if (Number(arrayOfGames[0]) + Number(arrayOfGames[1]) > 1) {
+					if (Number(arrayOfGames[0]) < 6 && Number(arrayOfGames[1]) < 6) {
+						resultIsCorrect = false
+					}
+				}
+			}
+		})
+
+		if (resultIsCorrect) {
+			return arrayOfSets
+		} else {
+			const details = `API ISSUE: Result (ss) is not valid: ${resultData}, for match ${matchId} with status: ${status}`
+			await saveResultIssue(details, status, matchId, home, away)
+			return 'Not updated'
+		}
 	}
 }
 
-export const getMatchWinner = (formattedResult: IMatchStats['result'], home: IPlayer, away: IPlayer, matchId: number): IPlayer | undefined => {
+const saveResultIssue = async (
+	details: string,
+	status: string,
+	matchId: number,
+	home: IPlayer | IDoublesPlayer,
+	away: IPlayer | IDoublesPlayer,
+): Promise<void> => {
+	logger.warn(details)
+
+	const existingIssue = await config.database.services.getters.getEndedMatchesIssue(matchId)
+
+	if (existingIssue !== null) {
+		return
+	}
+
+	const resultIssueObject: IResultIssue = {
+		matchId,
+		home,
+		away,
+		status: getMatchStatus(Number(status), matchId),
+		details,
+	}
+	await config.database.services.savers.saveNewResultIssue(resultIssueObject)
+}
+
+export const getMatchWinner = (
+	formattedResult: IMatchStats['result'],
+	home: IPlayer | IDoublesPlayer,
+	away: IPlayer | IDoublesPlayer,
+	matchId: number,
+): IPlayer | IDoublesPlayer | undefined => {
 	if (Array.isArray(formattedResult)) {
-		const lastSetResult = formattedResult[formattedResult.length-1].split('-')
+		const lastSetResult = formattedResult[formattedResult.length - 1].split('-')
 		if (Number(lastSetResult[0]) > Number(lastSetResult[1])) {
 			return home
 		} else {
@@ -244,8 +298,13 @@ export const createNewEndedMatchObject = async (
 	bpData: string[] | undefined,
 	setStatsData: Array<{ id: string; text: string }> | undefined,
 ): Promise<IMatch> => {
-
-	const formattedResult = await getformattedResult(resultData, preMatchData.home, preMatchData.away, status, preMatchData.api_id)
+	const formattedResult = await getformattedResult(
+		resultData,
+		preMatchData.home,
+		preMatchData.away,
+		status,
+		preMatchData.api_id,
+	)
 	const winner = getMatchWinner(formattedResult, preMatchData.home, preMatchData.away, preMatchData.api_id)
 
 	const endedMatchData: IMatch = Object.assign(

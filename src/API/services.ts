@@ -42,8 +42,25 @@ const getEndedMatches = async (page: number = 1): Promise<EndedMatchesRes> => {
 		throw createError(err, 'get ended matches')
 	}
 }
+const getPlayerEndedMatches = async (page: number = 1, api_id: number): Promise<EndedMatchesRes> => {
+	try {
+		const res = await axios.get(`${config.api.endpoints.baseURLs.endedMatches}`, {
+			params: {
+				[config.api.endpoints.params.keys.token]: config.api.endpoints.params.values.token,
+				[config.api.endpoints.params.keys.sport_id]: config.api.endpoints.params.values.tennisID,
+				[config.api.endpoints.params.keys.team_id]: api_id,
+				[config.api.endpoints.params.keys.page]: page,
+			},
+		})
 
+		const endedMatches: EndedMatchesRes = res.data
 
+		return endedMatches
+	} catch (err) {
+		console.log(err)
+		throw createError(err, 'get ended matches')
+	}
+}
 
 const getEventView = async (api_id: number): Promise<MatchView> => {
 	try {
@@ -108,5 +125,6 @@ export const SERVICES = {
 	getEventView,
 	getTeamMembers,
 	getMatchOdds,
-	getEndedMatches
+	getEndedMatches,
+	getPlayerEndedMatches,
 }

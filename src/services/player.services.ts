@@ -1,9 +1,25 @@
 import config from '@config/index'
-import type { Gender, IDoublesPlayer, IMatchPlayers, IMatchPlayersObject, IPlayer, Type } from 'types/schemas'
+import type {
+	Gender,
+	ICourt,
+	IDoublesPlayer,
+	IMatchPlayers,
+	IMatchPlayersObject,
+	IPlayer,
+	IPreOdds,
+	ITournament,
+	Type,
+} from 'types/schemas'
 import { checkIfArrayIncludesSubstring } from '@utils/checkArrayIncludesSubstring'
 import { countriesCCArray } from '@constants/countries'
 import logger from '@config/logger'
-import { type } from '@constants/data'
+import { gender, type } from '@constants/data'
+import type { EndedMatches } from '@API/types/endedMatches'
+import { tournamentHandler } from './tournament.services'
+import { courtHanlder } from './court.services'
+import { preMatchOddsHandler } from './odds.services'
+import { createNewEndedMatchObject, createNewPreMatchObject } from './match.services'
+import { msToDateTime } from '@utils/msToDateTime'
 
 const checkIfIsPlayer = (playerName: string): boolean => {
 	return !checkIfArrayIncludesSubstring(config.api.formats.Team, playerName)
@@ -169,19 +185,18 @@ export const playerHandler = async (
 	tournamentType: Type,
 	matchGender: Gender,
 ): Promise<IMatchPlayers> => {
-
 	let savedPlayers: IMatchPlayersObject = {
 		home: undefined,
 		away: undefined,
 	}
 
 	if (tournamentType === type.menDoubles || tournamentType === type.womenDoubles) {
-		savedPlayers = await saveDoublesPlayers(playersArray,matchGender)
+		savedPlayers = await saveDoublesPlayers(playersArray, matchGender)
 	} else if (tournamentType === type.menMixed) {
-		if(checkIfIsPlayer(playersArray[0].name)) {
+		if (checkIfIsPlayer(playersArray[0].name)) {
 			savedPlayers = await savePlayer(playersArray)
 		} else {
-			savedPlayers = await saveDoublesPlayers(playersArray,matchGender)
+			savedPlayers = await saveDoublesPlayers(playersArray, matchGender)
 		}
 	} else {
 		savedPlayers = await savePlayer(playersArray)
@@ -194,7 +209,162 @@ export const playerHandler = async (
 		}
 	} else {
 		throw new Error(
-			`PROCESS: Player handler | INFO: Player handler missed and at least one player is undefined | DETAILS: home: ${playersArray[0].api_id} - away: ${playersArray[0].api_id}`,
+			`PROCESS: Player handler | INFO: Player handler missed and at least one player is undefined | DETAILS: home: ${playersArray[0].api_id} - away: ${playersArray[1].api_id}`,
 		)
+	}
+}
+
+export const getAllPlayerEndedMatchesFromAPI = async (api_id: number): Promise<EndedMatches[]> => {
+	const playerEndedMatches: EndedMatches[] = []
+	let page = 1
+
+	const playerEndedMatchesApiResponse = await config.api.services.getPlayerEndedMatches(page, api_id)
+	playerEndedMatches.push(...playerEndedMatchesApiResponse.results)
+
+	do {
+		page += 1
+		const apiResponse = await config.api.services.getPlayerEndedMatches(page, api_id)
+		playerEndedMatches.push(...apiResponse.results)
+	} while (playerEndedMatches.length < playerEndedMatchesApiResponse.pager.total)
+
+	return playerEndedMatches
+}
+
+export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
+	try {
+		console.log('func executing')
+		const playerData = await config.database.services.getters.getPlayer(api_id)
+
+		if (playerData === null) {
+			return
+		}
+
+		const playerId = playerData._id
+
+		let newPlayerEndedMatchesStored = 0
+		let playerEndedMatchesalreadyStored = 0
+		const playerEndedMatchesAPI = await getAllPlayerEndedMatchesFromAPI(api_id)
+		console.log('partido API', playerEndedMatchesAPI.length)
+		if (playerEndedMatchesAPI.length === 0) {
+			return
+		}
+		const endedMatchesAPIApiIds = playerEndedMatchesAPI.map((match) => {
+			return Number(match.id)
+		})
+
+		const playerEndedMatchesDB = await config.database.services.getters.getAllPlayerEndedMatches(playerId)
+		let endedMatchesDBApiIds: number[] | undefined
+		console.log('partido DB', playerEndedMatchesDB?.length)
+
+		if (playerEndedMatchesDB !== null) {
+			endedMatchesDBApiIds = playerEndedMatchesDB.map((match) => {
+				return match.api_id
+			})
+			playerEndedMatchesalreadyStored = endedMatchesDBApiIds.length
+		}
+
+		const playerEndedMatchesNotStored = endedMatchesAPIApiIds.filter((apiId) => {
+			if (endedMatchesDBApiIds === undefined) {
+				return apiId
+			} else {
+				return !(endedMatchesDBApiIds?.includes(apiId) ?? false)
+			}
+		})
+
+		console.log(playerEndedMatchesNotStored.length)
+
+		for (const apiId of playerEndedMatchesNotStored) {
+			console.log('storing a new ended match')
+			console.log(apiId)
+			const eventViewAPIResponse = await config.api.services.getEventView(apiId)
+
+			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['2']) {
+				continue
+			}
+
+			const tournament: ITournament = await tournamentHandler(
+				Number(eventViewAPIResponse.id),
+				Number(eventViewAPIResponse.league.id),
+				eventViewAPIResponse.league.name,
+				eventViewAPIResponse.league.cc,
+				eventViewAPIResponse,
+			)
+
+			const matchGender =
+				tournament.type === type.women || tournament.type === type.womenDoubles ? gender.female : gender.male
+
+			const playersArray: IPlayer[] = [
+				createNewPlayerObject(
+					Number(eventViewAPIResponse.home.id),
+					eventViewAPIResponse.home.name,
+					matchGender,
+					eventViewAPIResponse.home.cc,
+				),
+				createNewPlayerObject(
+					Number(eventViewAPIResponse.away.id),
+					eventViewAPIResponse.away.name,
+					matchGender,
+					eventViewAPIResponse.away.cc,
+				),
+			]
+
+			const { home, away } = await playerHandler(playersArray, tournament.type, matchGender)
+
+			const court: ICourt | null = await courtHanlder(eventViewAPIResponse?.extra?.stadium_data)
+
+			const pre_odds: IPreOdds | null = await preMatchOddsHandler(
+				Number(eventViewAPIResponse.bet365_id),
+				Number(eventViewAPIResponse.id),
+			)
+
+			if (home !== null && away !== null) {
+				const preMatchData = createNewPreMatchObject(
+					Number(eventViewAPIResponse.id),
+					Number(eventViewAPIResponse.bet365_id),
+					Number(eventViewAPIResponse.sport_id),
+					tournament.type,
+					eventViewAPIResponse.extra.round,
+					tournament,
+					court,
+					home,
+					away,
+					eventViewAPIResponse.time_status,
+					msToDateTime(eventViewAPIResponse.time),
+					pre_odds,
+				)
+
+				const { ss, stats, events, time_status } = eventViewAPIResponse
+
+				const endedMatchData = await createNewEndedMatchObject(
+					time_status,
+					preMatchData,
+					ss,
+					stats?.aces,
+					stats?.double_faults,
+					stats?.win_1st_serve,
+					stats?.break_point_conversions,
+					events,
+				)
+
+				console.log(endedMatchData)
+
+				if (endedMatchData === undefined) {
+					continue
+				}
+
+				await config.database.services.savers.saveNewEndedMatch(endedMatchData)
+				console.log('partido guardado')
+
+				newPlayerEndedMatchesStored++
+			}
+		}
+		
+		logger.info(
+			`${newPlayerEndedMatchesStored} SAVED ended matches || ${playerEndedMatchesalreadyStored} EXISTING ended matches on DB || ${
+				newPlayerEndedMatchesStored + playerEndedMatchesalreadyStored
+			} TOTAL ended matches for player with id: ${api_id}`,
+		)
+	} catch (err) {
+		logger.error(err)
 	}
 }

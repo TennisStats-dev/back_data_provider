@@ -9,7 +9,6 @@ const playerSchema = new Schema<IPlayer | IDoublesPlayer>(
 		gender: { type: String, enum: Object.values(gender), required: true },
 		birth: { type: Date },
 		cc: { type: String },
-
 		team: {
 			p1: { type: Schema.Types.ObjectId, ref: 'Player' },
 			p2: { type: Schema.Types.ObjectId, ref: 'Player' },

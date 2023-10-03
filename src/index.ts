@@ -39,3 +39,4 @@ const port = config.server.port || '0.0.0.0:$PORT'
 app.listen(port, () => {
 	logger.info(`Server running on port ${port}`)
 })
+

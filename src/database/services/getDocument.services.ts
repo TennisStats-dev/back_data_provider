@@ -87,6 +87,18 @@ const getEndedMatch = async (api_id: number): Promise<(IMatch & Document) | null
 	}
 }
 
+const getAllPlayerEndedMatches = async (id: string): Promise<Array<IPreMatch & Document> | null> => {
+	try {
+		const existingPopulatedMatch = await Match.find({ $or: [ { home: id }, { away: id } ] })
+
+		return existingPopulatedMatch
+	} catch (err) {
+		console.log(err)
+		logger.error('Error getting all player ended matches')
+		throw new Error('Error getting all player ended matches')
+	}
+}
+
 const getAllEndedMatches = async (): Promise<Array<IMatch & Document> | null> => {
 	try {
 		const existingPopulatedMatch = await Match.find()
@@ -128,6 +140,20 @@ const getAllTournaments = async (): Promise<Array<ITournament & Document> | null
 	}
 }
 
+const getEndedMatchesIssue = async (matchId: number): Promise<IResultIssue & Document | null> => {
+	try {
+		const existingEndedMatchesIssue = await ResultIssue.findOne({
+			matchId,
+		})
+
+		return existingEndedMatchesIssue
+	} catch (err) {
+		console.log(err)
+		logger.error('Error getting one ended matches issues')
+		throw new Error('Error getting one ended matches issues')
+	}
+}
+
 const getAllEndedMatchesIssues = async (): Promise<Array<IResultIssue & Document> | null> => {
 	try {
 		const existingEndedMatchesIssues = await ResultIssue.find()
@@ -147,8 +173,10 @@ const GET = {
 	getAllPreMatches,
 	getEndedMatch,
 	getAllEndedMatches,
+	getAllPlayerEndedMatches,
 	getTournament,
 	getAllTournaments,
+	getEndedMatchesIssue,
 	getAllEndedMatchesIssues,
 }
 

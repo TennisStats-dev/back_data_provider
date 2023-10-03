@@ -1,16 +1,16 @@
-import config from "@config/index"
-import logger from "@config/logger"
-import { gender, type } from "@constants/data"
-import { courtHanlder } from "@services/court.services"
-import { createNewEndedMatchObject, createNewPreMatchObject, getAllEndedMatchesFromAPI } from "@services/match.services"
-import { preMatchOddsHandler } from "@services/odds.services"
-import { createNewPlayerObject, playerHandler } from "@services/player.services"
-import { tournamentHandler } from "@services/tournament.services"
-import { msToDateTime } from "@utils/msToDateTime"
-import { msToStringTime } from "@utils/msToStringTime"
-import type { Request, Response } from "express"
-import type { Document } from "mongoose"
-import type { ICourt, IMatch, IPlayer, IPreOdds, ITournament } from "types/schemas"
+import config from '@config/index'
+import logger from '@config/logger'
+import { gender, type } from '@constants/data'
+import { courtHanlder } from '@services/court.services'
+import { createNewEndedMatchObject, createNewPreMatchObject, getAllEndedMatchesFromAPI } from '@services/match.services'
+import { preMatchOddsHandler } from '@services/odds.services'
+import { createNewPlayerObject, playerHandler } from '@services/player.services'
+import { tournamentHandler } from '@services/tournament.services'
+import { msToDateTime } from '@utils/msToDateTime'
+import { msToStringTime } from '@utils/msToStringTime'
+import type { Request, Response } from 'express'
+import type { Document } from 'mongoose'
+import type { ICourt, IMatch, IPlayer, IPreOdds, ITournament } from 'types/schemas'
 
 export const saveAllEndedMatches = async (_req: Request, _res: Response): Promise<void> => {
 	try {
@@ -21,7 +21,7 @@ export const saveAllEndedMatches = async (_req: Request, _res: Response): Promis
 		const newMatchesSaved: IMatch[] = []
 		let preMatchesPadel = 0
 		let endedMatchesToBeFixed = 0
-        let endedMatchAlradyStored = 0
+		let endedMatchAlradyStored = 0
 		let upcomingMatchesDeleted = 0
 
 		const allEndedMatchesAPI = await getAllEndedMatchesFromAPI()
@@ -35,17 +35,16 @@ export const saveAllEndedMatches = async (_req: Request, _res: Response): Promis
 			}
 
 			if (Number(match.time_status) === config.api.constants.matchStatus['2']) {
-				endedMatchesToBeFixed ++
+				endedMatchesToBeFixed++
 				continue
 			}
 
-			
 			let matchDB: (IMatch & Document<any, any, any>) | undefined
-			
+
 			if (endedMatchesDB !== null) {
 				matchDB = endedMatchesDB.find((matchDB) => matchDB?.api_id === Number(match?.id))
 			}
-			
+
 			if (matchDB !== null && matchDB !== undefined) {
 				endedMatchAlradyStored++
 				continue
@@ -91,25 +90,28 @@ export const saveAllEndedMatches = async (_req: Request, _res: Response): Promis
 					pre_odds,
 				)
 
-                const { ss, stats, events, time_status } = eventViewAPIResponse
-        
-                const endedMatchData = await createNewEndedMatchObject(
-                    time_status,
-                    preMatchData,
-                    ss,
-                    stats?.aces,
-                    stats?.double_faults,
-                    stats?.win_1st_serve,
-                    stats?.break_point_conversions,
-                    events,
-                )
+				const { ss, stats, events, time_status } = eventViewAPIResponse
 
-				
+				const endedMatchData = await createNewEndedMatchObject(
+					time_status,
+					preMatchData,
+					ss,
+					stats?.aces,
+					stats?.double_faults,
+					stats?.win_1st_serve,
+					stats?.break_point_conversions,
+					events,
+				)
+
+				if (endedMatchData === undefined) {
+					continue
+				}
+
 				const savedEndedMatch = await config.database.services.savers.saveNewEndedMatch(endedMatchData)
-				
+
 				const upcomingMatchDB = await config.database.services.deleters.deletePreMatch(savedEndedMatch.api_id)
 
-				if (upcomingMatchDB) {
+				if (matchDB !== undefined && upcomingMatchDB) {
 					upcomingMatchesDeleted++
 				}
 
@@ -123,13 +125,13 @@ export const saveAllEndedMatches = async (_req: Request, _res: Response): Promis
 
 		const finishDate = new Date()
 		const duration = msToStringTime(finishDate.getTime() - startDate.getTime())
-		logger.info(`${newMatchesSaved.length} SAVED ended matches || ${preMatchesPadel} AVOIDED Padel ended matches || ${endedMatchAlradyStored} ended matches already stored || ${endedMatchesToBeFixed} ended matches to be Fixed || ${upcomingMatchesDeleted} upcoming matches deleted from DB`)	
+		logger.info(
+			`${newMatchesSaved.length} SAVED ended matches || ${preMatchesPadel} AVOIDED Padel ended matches || ${endedMatchAlradyStored} ended matches already stored || ${endedMatchesToBeFixed} ended matches to be Fixed || ${upcomingMatchesDeleted} upcoming matches deleted from DB`,
+		)
 		const iteratedMatches = newMatchesSaved.length + preMatchesPadel + endedMatchAlradyStored + endedMatchesToBeFixed
 		logger.info(`ITERATIONS: ${iteratedMatches}`)
-		logger.info(`The process finished at: ${finishDate.toString()}, TOTAL DURATION :', ${duration}`,
-		)
+		logger.info(`The process finished at: ${finishDate.toString()}, TOTAL DURATION :', ${duration}`)
 	} catch (err) {
 		logger.error(err)
 	}
-
 }

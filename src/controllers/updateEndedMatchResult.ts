@@ -1,8 +1,8 @@
-import config from "@config/index"
-import logger from "@config/logger"
-import { getMatchWinner, getformattedResult } from "@services/match.services"
-import { msToStringTime } from "@utils/msToStringTime"
-import type { Request, Response } from "express"
+import config from '@config/index'
+import logger from '@config/logger'
+import { getMatchWinner, getformattedResult } from '@services/match.services'
+import { msToStringTime } from '@utils/msToStringTime'
+import type { Request, Response } from 'express'
 
 export const udpateEndedMatchesResult = async (_req: Request, _res: Response): Promise<void> => {
 	try {
@@ -10,45 +10,63 @@ export const udpateEndedMatchesResult = async (_req: Request, _res: Response): P
 		const startDate = new Date()
 		logger.info(`update ended matches result started at: ${startDate.toString()}`)
 
-        const nullResultMatches = await config.database.services.getters.getAllEndedMatchesIssues()
+		const nullResultMatches = await config.database.services.getters.getAllEndedMatchesIssues()
 
-        let resultMatchesFixedCount = 0
-        let IssuesDeletedCount = 0
+		let resultMatchesFixedCount = 0
+		let IssuesDeletedCount = 0
 
-        if (nullResultMatches === null) {
-            logger.info('There are no issues with ended matches result')
-            const finishDate = new Date()
-            const duration = msToStringTime(finishDate.getTime() - startDate.getTime())
-            logger.info(`The process finished at: ${finishDate.toString()}, TOTAL DURATION :', ${duration}`)
+		if (nullResultMatches === null) {
+			logger.info('There are no issues with ended matches result')
+			const finishDate = new Date()
+			const duration = msToStringTime(finishDate.getTime() - startDate.getTime())
+			logger.info(`The process finished at: ${finishDate.toString()}, TOTAL DURATION :', ${duration}`)
 
-            return
-        }
+			return
+		}
 
-        for (const issue of nullResultMatches) {
-            const eventViewAPIResponse = await config.api.services.getEventView(issue.matchId)
+		for (const issue of nullResultMatches) {
+			const endedMatch = await config.database.services.getters.getEndedMatch(issue.matchId)
 
-            if(eventViewAPIResponse.ss !== null ) {
-                const formattedResult = await getformattedResult(eventViewAPIResponse.ss, issue.home, issue.away, eventViewAPIResponse.time_status, issue.matchId)
-                const winner = getMatchWinner(formattedResult, issue.home, issue.away, issue.matchId)
+			if (endedMatch === null) {
+				logger.warn(
+					`Match: ${issue.matchId} has stored as result issue but there is no corresponding endedMatch stored in DB`,
+				)
+				continue
+			}
 
-                const endedMatchToUpdate = await config.database.services.getters.getEndedMatch(issue.matchId)
+			const eventViewAPIResponse = await config.api.services.getEventView(issue.matchId)
 
-                if (endedMatchToUpdate !== null) {
-                    endedMatchToUpdate.match_stats.result = formattedResult
-                    endedMatchToUpdate.match_stats.winner = winner
+			if (eventViewAPIResponse.ss !== null) {
+				const formattedResult = await getformattedResult(
+					eventViewAPIResponse.ss,
+					issue.home,
+					issue.away,
+					eventViewAPIResponse.time_status,
+					issue.matchId,
+				)
 
-                    await endedMatchToUpdate.save()
+				if (formattedResult === 'Not updated') {
+					continue
+				}
 
-                    resultMatchesFixedCount++
+				const winner = getMatchWinner(formattedResult, issue.home, issue.away, issue.matchId)
 
-                    const endedMatchIssueDeleted = await config.database.services.deleters.deleteEndedMatchIssue(issue.matchId)
+				endedMatch.match_stats.result = formattedResult
+				endedMatch.match_stats.winner = winner
 
-                    if (endedMatchIssueDeleted) {
-                        IssuesDeletedCount++
-                    }
-                }
-            }
-        }
+				const savedMatch = await endedMatch.save()
+
+                console.log(`Result match updated ${savedMatch.api_id}`)
+
+				resultMatchesFixedCount++
+
+				const endedMatchIssueDeleted = await config.database.services.deleters.deleteEndedMatchIssue(issue.matchId)
+
+				if (endedMatchIssueDeleted) {
+					IssuesDeletedCount++
+				}
+			}
+		}
 
 		const finishDate = new Date()
 		const duration = msToStringTime(finishDate.getTime() - startDate.getTime())
