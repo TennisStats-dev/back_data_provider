@@ -2,13 +2,10 @@ import { type countriesCC } from '@constants/countries'
 import type {
 	matchStatus,
 	matchRound,
-	hours,
 	genderArray,
 	gameResultArray,
 	typeArray,
 	bestOfSets,
-	consistencyArray,
-	playerOptionArray,
 	circuitArray,
 	surfaceArray,
 	locationArray,
@@ -33,12 +30,6 @@ export type Circuit = (typeof circuitArray)[number]
 export type Type = (typeof typeArray)[number]
 
 export type BestOfSets = (typeof bestOfSets)[number]
-
-export type Consistency = (typeof consistencyArray)[number]
-
-export type PlayerOption = (typeof playerOptionArray)[number]
-
-export type Hours = (typeof hours)[number]
 
 // export interface IPlayerDetails {
 // 	api_id: number
@@ -69,6 +60,7 @@ export interface ICourt {
 
 export interface IMatchStats {
 	result: string[] | 'home' | 'away' | 'cancelled' | 'Not updated'
+	winner: IPlayer | undefined
 	aces?: [number, number]
 	df?: [number, number]
 	win_1st_serve?: [number, number]
@@ -125,7 +117,7 @@ export interface IDoublesPlayer {
 	birth?: Date
 	cc?: string
 	team: {
-		p1: IPlayer,
+		p1: IPlayer
 		p2?: IPlayer
 	}
 }
@@ -165,17 +157,6 @@ export interface IRanking {
 	ranking: IPlayerRanking[]
 }
 
-interface IRequests {
-	number: Hours
-	requests: number
-}
-
-export interface IRequestsInfo {
-	date: string
-	hour: IRequests[]
-}
-
-
 export interface IMatchPlayers {
 	home: IPlayer | IDoublesPlayer
 	away: IPlayer | IDoublesPlayer
@@ -187,25 +168,26 @@ export interface IMatchPlayersObject {
 }
 
 export interface IResultIssue {
-	matchId: number,
-	status: Status, 
+	matchId: number
+	home: IPlayer
+	away: IPlayer
+	status: Status
 	details: string
 }
 
-export interface IMatchNotFound {
-	matchId: number,
+export interface INotFoundMatch {
+	matchId: number
 	home: {
-		api_id: number,
-		name: string,
+		api_id: number
+		name: string
 	}
 	away: {
-		api_id: number,
-		name: string,
+		api_id: number
+		name: string
 	}
 	tournament: {
-		api_id: number,
-		name: string,
-	},
-	details: string,
+		api_id: number
+		name: string
+	}
+	details: string
 }
-

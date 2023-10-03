@@ -4,7 +4,7 @@ import { endedMatchStatus } from '@constants/data'
 import { createNewEndedMatchObject, getMatchStatus } from '@services/match.services'
 import { msToStringTime } from '@utils/msToStringTime'
 import type { NextFunction, Request, Response } from 'express'
-import type { IMatch, IMatchNotFound, IPreMatch } from 'types/schemas'
+import type { IMatch, INotFoundMatch, IPreMatch } from 'types/schemas'
 
 export const saveEndedMatchesFromPrematches = async (
 	_req: Request,
@@ -44,7 +44,7 @@ export const saveEndedMatchesFromPrematches = async (
 				const details = `!!! The match with the id ${match.api_id}, tournament ID: ${match.tournament.api_id} and name ${match.tournament.name}, players: ${match.home.api_id}: ${match.home.name} vs ${match.away.api_id}: ${match.away.name} doesn't have an event view !!! - check whether there is the corresponding match with another ID or not`
 				logger.warn(details)
 
-				const matchNotFoundObject: IMatchNotFound = {
+				const matchNotFoundObject: INotFoundMatch = {
 					matchId: Number(match.api_id),
 					home: {
 						api_id: match.home.api_id,

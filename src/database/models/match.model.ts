@@ -34,6 +34,7 @@ const MatchSchema = new Schema<IMatch>(
 		// b365_end_time: { type: Date },
 		match_stats: {
 			result: { type: [String], required: true },
+			winner: { type: Schema.Types.ObjectId, ref: 'Player'},
 			aces: { type: [Number, Number] },
 			df: { type: [Number, Number] },
 			win_1st_serve: { type: [Number, Number] },

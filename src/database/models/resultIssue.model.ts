@@ -5,6 +5,8 @@ import type { IResultIssue } from 'types/schemas'
 const resultIssueSchema = new Schema<IResultIssue>(
 	{
 		matchId: { type: Number, required: true, unique: true },
+		home: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
+		away: { type: Schema.Types.ObjectId, ref: 'Player', required: true },
         status: { type: Number, enum: Object.values(matchStatus), required: true },
 		details: { type: String, required: true },
 	},

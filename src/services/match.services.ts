@@ -184,7 +184,7 @@ export const updateMatchData = async (
 	}
 }
 
-export const getformattedResult = async (resultData: string, status: string, matchID: number): Promise<IMatchStats['result']> => {
+export const getformattedResult = async (resultData: string, home: IPlayer, away: IPlayer, status: string, matchID: number): Promise<IMatchStats['result']> => {
 	if (Number(status) === config.api.constants.matchStatus['5']) {
 		return 'cancelled'
 	} else if (
@@ -195,12 +195,14 @@ export const getformattedResult = async (resultData: string, status: string, mat
 		const details = `API ISSUE: Result (ss) is NULL for match ${matchID} with status: ${status}`
 		logger.warn(details)
 
-		const issueObject: IResultIssue = {
+		const resultIssueObject: IResultIssue = {
 			matchId: Number(matchID),
+			home,
+			away,
 			status: getMatchStatus(Number(status), Number(matchID)),
 			details,
 		}
-		await config.database.services.savers.saveNewResultIssue(issueObject)
+		await config.database.services.savers.saveNewResultIssue(resultIssueObject)
 
 		return 'Not updated'
 	} else if (resultData === 'home' || resultData === 'away') {
@@ -208,6 +210,28 @@ export const getformattedResult = async (resultData: string, status: string, mat
 	} else {
 		return resultData.split(',')
 	}
+}
+
+export const getMatchWinner = (formattedResult: IMatchStats['result'], home: IPlayer, away: IPlayer, matchId: number): IPlayer | undefined => {
+	if (Array.isArray(formattedResult)) {
+		const lastSetResult = formattedResult[formattedResult.length-1].split('-')
+		if (Number(lastSetResult[0]) > Number(lastSetResult[1])) {
+			return home
+		} else {
+			return away
+		}
+	} else if (formattedResult === 'cancelled') {
+		return undefined
+	} else if (formattedResult === 'home') {
+		return home
+	} else if (formattedResult === 'away') {
+		return away
+	} else if (formattedResult === 'Not updated') {
+		return undefined
+	}
+
+	logger.warn(`It was not possilbe to identify a result format and set a winner for match ${matchId}`)
+	return undefined
 }
 
 export const createNewEndedMatchObject = async (
@@ -221,12 +245,14 @@ export const createNewEndedMatchObject = async (
 	setStatsData: Array<{ id: string; text: string }> | undefined,
 ): Promise<IMatch> => {
 
-	const resultFormatted = await getformattedResult(resultData, status, preMatchData.api_id)
+	const formattedResult = await getformattedResult(resultData, preMatchData.home, preMatchData.away, status, preMatchData.api_id)
+	const winner = getMatchWinner(formattedResult, preMatchData.home, preMatchData.away, preMatchData.api_id)
 
 	const endedMatchData: IMatch = Object.assign(
 		{
 			match_stats: {
-				result: resultFormatted,
+				result: formattedResult,
+				winner,
 			},
 		},
 		preMatchData,
@@ -251,8 +277,8 @@ export const createNewEndedMatchObject = async (
 
 	const setStats: ISetStats[] = []
 
-	if (Array.isArray(resultFormatted) && setStatsData !== undefined && setStatsData.length > 0) {
-		const totalGamesPerSet = resultFormatted.map((stringRes) => {
+	if (Array.isArray(formattedResult) && setStatsData !== undefined && setStatsData.length > 0) {
+		const totalGamesPerSet = formattedResult.map((stringRes) => {
 			return stringRes
 				.split('-')
 				.map((stringRes) => Number(stringRes))

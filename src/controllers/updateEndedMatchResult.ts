@@ -1,6 +1,6 @@
 import config from "@config/index"
 import logger from "@config/logger"
-import { getformattedResult } from "@services/match.services"
+import { getMatchWinner, getformattedResult } from "@services/match.services"
 import { msToStringTime } from "@utils/msToStringTime"
 import type { Request, Response } from "express"
 
@@ -28,12 +28,14 @@ export const udpateEndedMatchesResult = async (_req: Request, _res: Response): P
             const eventViewAPIResponse = await config.api.services.getEventView(issue.matchId)
 
             if(eventViewAPIResponse.ss !== null ) {
-                const formattedResult = await getformattedResult(eventViewAPIResponse.ss, eventViewAPIResponse.time_status, issue.matchId)
+                const formattedResult = await getformattedResult(eventViewAPIResponse.ss, issue.home, issue.away, eventViewAPIResponse.time_status, issue.matchId)
+                const winner = getMatchWinner(formattedResult, issue.home, issue.away, issue.matchId)
 
                 const endedMatchToUpdate = await config.database.services.getters.getEndedMatch(issue.matchId)
 
                 if (endedMatchToUpdate !== null) {
                     endedMatchToUpdate.match_stats.result = formattedResult
+                    endedMatchToUpdate.match_stats.winner = winner
 
                     await endedMatchToUpdate.save()
 

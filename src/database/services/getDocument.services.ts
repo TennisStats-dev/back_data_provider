@@ -3,11 +3,10 @@ import Court from '@database/models/court.model'
 import Match from '@database/models/match.model'
 import { Player } from '@database/models/player.model'
 import PreMatch from '@database/models/preMatch.model'
-import RequestsInfo from '@database/models/requestsInfo.model'
 import ResultIssue from '@database/models/resultIssue.model'
 import Tournament from '@database/models/tournament.model'
 import type { Document } from 'mongoose'
-import type { ICourt, IMatch, IPlayer, IPreMatch, IRequestsInfo, IResultIssue, ITournament } from 'types/schemas'
+import type { ICourt, IMatch, IPlayer, IPreMatch, IResultIssue, ITournament } from 'types/schemas'
 
 const getCourt = async (api_id: number): Promise<(ICourt & Document) | null> => {
 	try {
@@ -141,20 +140,6 @@ const getAllEndedMatchesIssues = async (): Promise<Array<IResultIssue & Document
 	}
 }
 
-const getRequestsInfo = async (formattedDate: string): Promise<(IRequestsInfo & Document) | null> => {
-	try {
-		const existingRequestInfoDay = await RequestsInfo.findOne({
-			date: formattedDate,
-		})
-
-		return existingRequestInfoDay
-	} catch (err) {
-		console.log(err)
-		logger.error('Error getting the requests info')
-		throw new Error('Error getting the requests info')
-	}
-}
-
 const GET = {
 	getPlayer,
 	getCourt,
@@ -165,7 +150,6 @@ const GET = {
 	getTournament,
 	getAllTournaments,
 	getAllEndedMatchesIssues,
-	getRequestsInfo,
 }
 
 export default GET

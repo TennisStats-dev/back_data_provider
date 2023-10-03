@@ -1,15 +1,13 @@
 import Court from '@database/models/court.model'
 import { Player } from '@database/models/player.model'
 import PreMatch from '@database/models/preMatch.model'
-import RequestsInfo from '@database/models/requestsInfo.model'
 import Tournament from '@database/models/tournament.model'
-import { hours } from '@constants/data'
 import type { Document } from 'mongoose'
-import type { ICourt, IMatch, IMatchNotFound, IPlayer, IPreMatch, IRequestsInfo, IResultIssue, ITournament } from 'types/schemas'
+import type { ICourt, IMatch, INotFoundMatch, IPlayer, IPreMatch, IResultIssue, ITournament } from 'types/schemas'
 import logger from '@config/logger'
 import Match from '@database/models/match.model'
 import ResultIssue from '@database/models/resultIssue.model'
-import MatchNotFound from '@database/models/matchNotFound'
+import MatchNotFound from '@database/models/notFountMatch'
 
 const saveNewCourt = async (courtData: ICourt): Promise<ICourt & Document> => {
 	try {
@@ -93,7 +91,7 @@ const saveNewResultIssue = async (issueData: IResultIssue): Promise<void> => {
 	}
 }
 
-const saveNewMatchNotFound = async (matchData: IMatchNotFound): Promise<void> => {
+const saveNewMatchNotFound = async (matchData: INotFoundMatch): Promise<void> => {
 	try {
 		const newMatchNotFound = new MatchNotFound(matchData)
 
@@ -105,32 +103,8 @@ const saveNewMatchNotFound = async (matchData: IMatchNotFound): Promise<void> =>
 	}
 }
 
-const saveNewRequestInfo = async (formattedDate: string): Promise<IRequestsInfo & Document> => {
-	try {
-		const requestInfoData: IRequestsInfo = {
-			date: formattedDate,
-			hour: hours.map((hour) => {
-				return {
-					number: hour,
-					requests: 0,
-				}
-			}),
-		}
-
-		const newRequestInfoDay = new RequestsInfo(requestInfoData)
-		const savedRequestInfoDay = await newRequestInfoDay.save()
-
-		return savedRequestInfoDay
-	} catch (err) {
-		console.log(err)
-		logger.error('Error when saving a new requests info')
-		throw new Error('Error when saving a new requests info')
-	}
-}
-
 const SAVE = {
 	saveNewCourt,
-	saveNewRequestInfo,
 	saveNewPlayer,
 	saveNewTournament,
 	saveNewPreMatch,

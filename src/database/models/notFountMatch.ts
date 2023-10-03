@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose'
-import type { IMatchNotFound } from 'types/schemas'
+import type { INotFoundMatch } from 'types/schemas'
 
-const matchNotFoundSchema = new Schema<IMatchNotFound>(
+const notFoundMatchSchema = new Schema<INotFoundMatch>(
 	{
 		matchId: { type: Number, required: true, unique: true },
         home: {
@@ -21,6 +21,6 @@ const matchNotFoundSchema = new Schema<IMatchNotFound>(
 	{ timestamps: true },
 )
 
-const MatchNotFound = model<IMatchNotFound>('MatchNotFound', matchNotFoundSchema)
+const NotFoundMatch = model<INotFoundMatch>('NotFoundMatch', notFoundMatchSchema)
 
-export default MatchNotFound
+export default NotFoundMatch

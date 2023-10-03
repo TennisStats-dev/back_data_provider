@@ -174,20 +174,3 @@ export const bestOfSets = {
 	[API.constants.bestOfSets[5]]: 5,
 } as const 
 
-export const consistency = {
-	worst: 0, // Lack of info about number of points
-	bad: 1, // Number of points well known but not their order
-	good: 2, // all points and their order well known
-} as const
-
-export const consistencyArray = Array.from(Object.values(consistency))
-
-export const playerOption = {
-	1: 1,
-	2: 2,
-} as const
-
-export const playerOptionArray = Array.from(Object.values(playerOption))
-
-export const hours = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23] as const
-
