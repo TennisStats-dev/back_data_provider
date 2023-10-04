@@ -2,7 +2,7 @@ import logger from '@config/logger'
 import type { Request, Response, NextFunction } from 'express'
 import config from '@config/index'
 import { gender, type } from '@constants/data'
-import type { ICourt, IPlayer, IPreMatch, IPreOdds, ITournament } from 'types/schemas'
+import type { ICourt, IPlayer, IPreMatch, IPreOdds, ITournament } from 'types/types'
 import { createNewPreMatchObject, getUpcomingMatchesFromAPI, updateMatchData } from '@services/match.services'
 import { createNewPlayerObject, playerHandler } from '@services/player.services'
 import { courtHanlder } from '@services/court.services'
@@ -32,14 +32,14 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response, next: N
 			}
 
 			// Temporary logger to monitorize which types have the upcoming matches coming from API
-			if(match.time_status !== '0') {
+			if (match.time_status !== '0') {
 				logger.warn(`The match with id ${match.id} has a status of ${match.time_status}`)
 			}
 
 			const eventViewAPIResponse = await config.api.services.getEventView(Number(match.id))
 
 			let matchDB: (IPreMatch & Document<any, any, any>) | undefined
-			
+
 			if (upcomingMatchesDB !== null) {
 				matchDB = upcomingMatchesDB.find((matchDB) => matchDB?.api_id === Number(match?.id))
 			}
@@ -50,9 +50,6 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response, next: N
 				preMatchUpdated++
 				continue
 			}
-
-
-
 
 			const tournament: ITournament = await tournamentHandler(
 				Number(match.id),
@@ -104,15 +101,13 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response, next: N
 
 		const finishDate = new Date()
 		const duration = msToStringTime(finishDate.getTime() - startDate.getTime())
-		logger.info(`${newMatchesSaved.length} SAVED pre matches`)	
+		logger.info(`${newMatchesSaved.length} SAVED pre matches`)
 		logger.info(`${preMatchPadel} AVOIDED Padel pre matches`)
 		logger.info(`${preMatchUpdated} UPDATED pre matches`)
-		logger.info(`The process finished at: ${finishDate.toString()}, TOTAL DURATION :', ${duration}`,
-		)
+		logger.info(`The process finished at: ${finishDate.toString()}, TOTAL DURATION :', ${duration}`)
 	} catch (err) {
 		logger.error(err)
 	}
 
 	next()
 }
-

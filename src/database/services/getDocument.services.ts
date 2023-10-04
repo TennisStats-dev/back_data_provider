@@ -6,7 +6,7 @@ import PreMatch from '@database/models/preMatch.model'
 import ResultIssue from '@database/models/resultIssue.model'
 import Tournament from '@database/models/tournament.model'
 import type { Document } from 'mongoose'
-import type { ICourt, IMatch, IPlayer, IPreMatch, IResultIssue, ITournament } from 'types/schemas'
+import type { ICourt, IMatch, IPlayer, IPreMatch, IResultIssue, ITournament } from 'types/types'
 
 const getCourt = async (api_id: number): Promise<(ICourt & Document) | null> => {
 	try {
@@ -89,7 +89,7 @@ const getEndedMatch = async (api_id: number): Promise<(IMatch & Document) | null
 
 const getAllPlayerEndedMatches = async (id: string): Promise<Array<IPreMatch & Document> | null> => {
 	try {
-		const existingPopulatedMatch = await Match.find({ $or: [ { home: id }, { away: id } ] })
+		const existingPopulatedMatch = await Match.find({ $or: [{ home: id }, { away: id }] })
 
 		return existingPopulatedMatch
 	} catch (err) {
@@ -140,7 +140,7 @@ const getAllTournaments = async (): Promise<Array<ITournament & Document> | null
 	}
 }
 
-const getEndedMatchesIssue = async (matchId: number): Promise<IResultIssue & Document | null> => {
+const getEndedMatchesIssue = async (matchId: number): Promise<(IResultIssue & Document) | null> => {
 	try {
 		const existingEndedMatchesIssue = await ResultIssue.findOne({
 			matchId,

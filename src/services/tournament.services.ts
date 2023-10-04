@@ -1,6 +1,6 @@
 import config from '@config/index'
 import { bestOfSets, gender, grounds, type } from '@constants/data'
-import type { Gender, ITournament, Type } from 'types/schemas'
+import type { Gender, ITournament, Type } from 'types/types'
 import { checkIfArrayIncludesSubstring } from '@utils/checkArrayIncludesSubstring'
 import logger from '@config/logger'
 import { countriesArray, countriesCCArray } from '@constants/countries'
@@ -119,12 +119,12 @@ export const getTournamentGround = (
 	tournamentId: number,
 	matchId: number,
 ): ITournament['ground'] => {
-
 	if (groundInput !== undefined) {
-
 		// If to monitorize Synthetic surface tournaments and check the real surface.
 		if (groundInput === API.constants.ground.syntheticOutdoor || groundInput === API.constants.ground.syntheticIndoor) {
-			logger.warn(`There is a match with a synthetic surface for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`)
+			logger.warn(
+				`There is a match with a synthetic surface for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`,
+			)
 		}
 
 		const ground = grounds[groundInput]
@@ -151,7 +151,6 @@ const createNewCompletTournamentObject = (
 	bestOfSetsInput: string | undefined,
 	groundInput: string | undefined,
 ): ITournament => {
-
 	const { type } = getTournamentTypeAndGender(name, api_id, matchId)
 
 	const circuit = getTournamentCircuit(name, api_id, matchId)
@@ -182,7 +181,7 @@ const createNewCompletTournamentObject = (
 		}
 	} else if (cc === null || cc === '') {
 		const countryName = countriesArray.find((country) => country.name === countryInput)
-		
+
 		if (countryName != null) {
 			tournamentData.cc = countryName.cc
 		}
@@ -197,7 +196,6 @@ const createNewIncompletTournamentObject = (
 	name: string,
 	cc: string | null,
 ): ITournament => {
-
 	const { type } = getTournamentTypeAndGender(name, api_id, matchId)
 
 	const circuit = getTournamentCircuit(name, api_id, matchId)

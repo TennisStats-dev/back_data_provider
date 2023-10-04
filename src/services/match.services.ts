@@ -15,7 +15,7 @@ import type {
 	ITournament,
 	Status,
 	Type,
-} from 'types/schemas'
+} from 'types/types'
 import type { UpcomingMatches } from '@API/types/upcomingMatches'
 import { preMatchOddsHandler } from './odds.services'
 import { msToDateTime } from '@utils/msToDateTime'

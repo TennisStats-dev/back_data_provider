@@ -1,4 +1,4 @@
-import type { IDoublesPlayer, IPlayer } from 'types/schemas'
+import type { IDoublesPlayer, IPlayer } from 'types/types'
 import { Schema, model } from 'mongoose'
 import { gender } from '@constants/data'
 

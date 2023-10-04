@@ -4,7 +4,7 @@ import { endedMatchStatus } from '@constants/data'
 import { createNewEndedMatchObject, getMatchStatus } from '@services/match.services'
 import { msToStringTime } from '@utils/msToStringTime'
 import type { NextFunction, Request, Response } from 'express'
-import type { IMatch, INotFoundMatch, IPreMatch } from 'types/schemas'
+import type { IMatch, INotFoundMatch, IPreMatch } from 'types/types'
 
 export const saveEndedMatchesFromPrematches = async (
 	_req: Request,

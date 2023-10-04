@@ -10,7 +10,7 @@ import { msToDateTime } from '@utils/msToDateTime'
 import { msToStringTime } from '@utils/msToStringTime'
 import type { Request, Response } from 'express'
 import type { Document } from 'mongoose'
-import type { ICourt, IMatch, IPlayer, IPreOdds, ITournament } from 'types/schemas'
+import type { ICourt, IMatch, IPlayer, IPreOdds, ITournament } from 'types/types'
 
 export const saveAllEndedMatches = async (_req: Request, _res: Response): Promise<void> => {
 	try {

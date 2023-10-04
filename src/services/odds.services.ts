@@ -1,18 +1,15 @@
 import type { EventOdds } from '@API/types/eventOdds'
 import config from '@config/index'
-import type { IPreOdds } from 'types/schemas'
+import type { IPreOdds } from 'types/types'
 
-const getMatchPreOdds = (eventOddsInput: EventOdds): IPreOdds => {    
-    const WinnerObject = eventOddsInput.odds[config.api.constants.oddsMarketsRef.winner]
+const getMatchPreOdds = (eventOddsInput: EventOdds): IPreOdds => {
+	const WinnerObject = eventOddsInput.odds[config.api.constants.oddsMarketsRef.winner]
 
 	const firstSetWinnerObject = eventOddsInput.odds[config.api.constants.oddsMarketsRef.firstSetWinner]
 
 	const preMatchOddsObject: IPreOdds = {
 		first: {
-			win: [
-				WinnerObject[WinnerObject.length - 1]?.home_od,
-				WinnerObject[WinnerObject.length - 1]?.away_od,
-			],
+			win: [WinnerObject[WinnerObject.length - 1]?.home_od, WinnerObject[WinnerObject.length - 1]?.away_od],
 			time: new Date(Number(WinnerObject[WinnerObject.length - 1].add_time) * 1000),
 		},
 		last: {
@@ -27,10 +24,7 @@ const getMatchPreOdds = (eventOddsInput: EventOdds): IPreOdds => {
 			firstSetWinnerObject[WinnerObject.length - 1]?.away_od,
 		]
 
-		preMatchOddsObject.last.win_1st_set = [
-			firstSetWinnerObject[0].home_od,
-			firstSetWinnerObject[0].away_od,
-		]
+		preMatchOddsObject.last.win_1st_set = [firstSetWinnerObject[0].home_od, firstSetWinnerObject[0].away_od]
 	}
 
 	return preMatchOddsObject

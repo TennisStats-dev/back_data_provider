@@ -2,7 +2,7 @@ import config from '@config/index'
 import logger from '@config/logger'
 import { getTournamentCircuit } from '@services/tournament.services'
 import type { Request, Response } from 'express'
-import type { ITournament } from 'types/schemas'
+import type { ITournament } from 'types/types'
 
 export const updateTournamentCircuit = async (_req: Request, _res: Response): Promise<void> => {
 	const allTournamentDB = await config.database.services.getters.getAllTournaments()
@@ -24,10 +24,10 @@ export const updateTournamentCircuit = async (_req: Request, _res: Response): Pr
 			tournament.circuit = circuitData
 
 			const updatedTournament = await tournament.save()
-            updatedTournaments.push(updatedTournament)
+			updatedTournaments.push(updatedTournament)
 		}
 	}
 
-    logger.info(`${updatedTournaments.length} tournaments updated - DETAILS: `)
-    logger.info(updatedTournaments)
+	logger.info(`${updatedTournaments.length} tournaments updated - DETAILS: `)
+	logger.info(updatedTournaments)
 }

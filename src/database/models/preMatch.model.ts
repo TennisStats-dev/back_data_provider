@@ -1,4 +1,4 @@
-import type { IPreMatch } from 'types/schemas'
+import type { IPreMatch } from 'types/types'
 import { Schema, model } from 'mongoose'
 
 const preMatchSchema = new Schema<IPreMatch>(
@@ -6,7 +6,7 @@ const preMatchSchema = new Schema<IPreMatch>(
 		api_id: { type: Number, required: true, unique: true },
 		bet365_id: { type: Number },
 		sport_id: { type: Number, required: true },
-		type: { type: String, required: true},
+		type: { type: String, required: true },
 		round: { type: String },
 		tournament: { type: Schema.Types.ObjectId, ref: 'Tournament', required: true },
 		court: { type: Schema.Types.ObjectId, ref: 'Court' },

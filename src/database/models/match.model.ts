@@ -1,4 +1,4 @@
-import type { IMatch } from 'types/schemas'
+import type { IMatch } from 'types/types'
 import { Schema, model } from 'mongoose'
 import { gameResult, matchStatus } from '@constants/data'
 
@@ -34,7 +34,7 @@ const MatchSchema = new Schema<IMatch>(
 		// b365_end_time: { type: Date },
 		match_stats: {
 			result: { type: [String], required: true },
-			winner: { type: Schema.Types.ObjectId, ref: 'Player'},
+			winner: { type: Schema.Types.ObjectId, ref: 'Player' },
 			aces: { type: [Number, Number] },
 			df: { type: [Number, Number] },
 			win_1st_serve: { type: [Number, Number] },
@@ -59,10 +59,8 @@ const MatchSchema = new Schema<IMatch>(
 								time: { type: Date },
 							},
 						],
-						
 					},
 				],
-				
 			},
 		],
 	},

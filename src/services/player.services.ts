@@ -9,7 +9,7 @@ import type {
 	IPreOdds,
 	ITournament,
 	Type,
-} from 'types/schemas'
+} from 'types/types'
 import { checkIfArrayIncludesSubstring } from '@utils/checkArrayIncludesSubstring'
 import { countriesCCArray } from '@constants/countries'
 import logger from '@config/logger'
@@ -358,7 +358,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 				newPlayerEndedMatchesStored++
 			}
 		}
-		
+
 		logger.info(
 			`${newPlayerEndedMatchesStored} SAVED ended matches || ${playerEndedMatchesalreadyStored} EXISTING ended matches on DB || ${
 				newPlayerEndedMatchesStored + playerEndedMatchesalreadyStored

@@ -1,4 +1,4 @@
-import type { IRanking } from 'types/schemas'
+import type { IRanking } from 'types/types'
 import { Schema, model } from 'mongoose'
 
 const rankingSchema = new Schema<IRanking>(
