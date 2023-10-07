@@ -168,12 +168,18 @@ export const updateMatchData = async (
 					matchDB.api_id,
 				)
 			}
-			if (tournamentDB.cc === undefined && eventViewAPIResponse.extra?.stadium_data?.country !== undefined) {
+			if (
+				tournamentDB.cc === undefined &&
+				eventViewAPIResponse.extra?.stadium_data?.country !== undefined &&
+				eventViewAPIResponse.extra?.stadium_data?.country !== null
+			) {
 				const countryName = countriesArray.find(
 					(country) => country.name === eventViewAPIResponse.extra.stadium_data.country,
 				)
 				if (countryName === undefined) {
-					logger.warn(`There is a player with a not stored country - CC: ${eventViewAPIResponse.extra.stadium_data.country}`)
+					logger.warn(
+						`There is a tournament (id: ${tournamentDB.api_id}, name: ${tournamentDB.name}) with a not stored country : ${eventViewAPIResponse.extra.stadium_data.country}`,
+					)
 				} else {
 					tournamentDB.cc = countryName.cc
 				}

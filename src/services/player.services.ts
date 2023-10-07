@@ -232,19 +232,21 @@ export const getAllPlayerEndedMatchesFromAPI = async (api_id: number): Promise<E
 
 export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 	try {
-		console.log('func executing')
 		const playerData = await config.database.services.getters.getPlayer(api_id)
 
 		if (playerData === null) {
+			logger.warn(`It was impossible to save all history matches for player id: ${api_id}`)
 			return
 		}
+
+		logger.info(`Saving ended matches for player: id: ${api_id} name: ${playerData.name}`)
 
 		const playerId = playerData._id
 
 		let newPlayerEndedMatchesStored = 0
 		let playerEndedMatchesalreadyStored = 0
 		const playerEndedMatchesAPI = await getAllPlayerEndedMatchesFromAPI(api_id)
-		console.log('partido API', playerEndedMatchesAPI.length)
+
 		if (playerEndedMatchesAPI.length === 0) {
 			return
 		}
@@ -254,7 +256,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 
 		const playerEndedMatchesDB = await config.database.services.getters.getAllPlayerEndedMatches(playerId)
 		let endedMatchesDBApiIds: number[] | undefined
-		console.log('partido DB', playerEndedMatchesDB?.length)
+
 
 		if (playerEndedMatchesDB !== null) {
 			endedMatchesDBApiIds = playerEndedMatchesDB.map((match) => {
@@ -271,11 +273,10 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 			}
 		})
 
-		console.log(playerEndedMatchesNotStored.length)
+
 
 		for (const apiId of playerEndedMatchesNotStored) {
-			console.log('storing a new ended match')
-			console.log(apiId)
+
 			const eventViewAPIResponse = await config.api.services.getEventView(apiId)
 
 			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['2']) {
@@ -346,8 +347,6 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 					events,
 				)
 
-				console.log(endedMatchData)
-
 				if (endedMatchData === undefined) {
 					continue
 				}
@@ -362,7 +361,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 		logger.info(
 			`${newPlayerEndedMatchesStored} SAVED ended matches || ${playerEndedMatchesalreadyStored} EXISTING ended matches on DB || ${
 				newPlayerEndedMatchesStored + playerEndedMatchesalreadyStored
-			} TOTAL ended matches for player with id: ${api_id}`,
+			} TOTAL ended matches for player with id: ${api_id} and name ${playerData.name}`,
 		)
 	} catch (err) {
 		logger.error(err)

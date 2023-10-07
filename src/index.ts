@@ -11,6 +11,9 @@ import { saveUpcomingMatches } from '@controllers/saveUpcomingMatchesController'
 import { updateTournamentCircuit } from '@controllers/updateTournamentData'
 import { saveAllEndedMatches } from '@controllers/saveAllEndedMatchesController'
 import { udpateEndedMatchesResult } from '@controllers/updateEndedMatchResult'
+import { CronJob } from 'cron'
+import { runCron } from '@controllers/runCron'
+
 
 export const app = express()
 app.use(express.json())
@@ -38,3 +41,15 @@ const port = config.server.port || '0.0.0.0:$PORT'
 app.listen(port, () => {
 	logger.info(`Server running on port ${port}`)
 })
+
+
+const job = new CronJob(
+	'*/15 * * * *',
+	async function () {
+		await runCron()
+	},
+	null,
+);
+
+job.start()
+
