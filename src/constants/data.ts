@@ -1,6 +1,12 @@
 import { API } from "@API/index"
 
 export const matchRound = {
+	[API.constants.matchRounds[1]]: 'F',
+	[API.constants.matchRounds[2]]: 'SF',
+	[API.constants.matchRounds[3]]: 'QF',
+	[API.constants.matchRounds[4]]: 'R16',
+	[API.constants.matchRounds[5]]: 'R32',
+	[API.constants.matchRounds[6]]: 'R64',
 	[API.constants.matchRounds[14]]: 'QR1',
 	[API.constants.matchRounds[15]]: 'QR2',
 	[API.constants.matchRounds[16]]: 'QR3',
@@ -14,8 +20,15 @@ export const matchRound = {
 	[API.constants.matchRounds[28]]: 'SF',
 	[API.constants.matchRounds[29]]: 'F',
 	[API.constants.matchRounds[44]]: 'QR',
+	[API.constants.matchRounds[45]]: 'QR',
+	[API.constants.matchRounds[46]]: 'QR',
 	[API.constants.matchRounds[54]]: 'QR',
+	[API.constants.matchRounds[60]]: 'QR',
 	[API.constants.matchRounds[62]]: 'QR',
+	[API.constants.matchRounds[64]]: 'QR',
+	[API.constants.matchRounds[164]]: 'QR',
+	[API.constants.matchRounds[166]]: 'QR',
+	[API.constants.matchRounds[168]]: 'QR',
 } as const
 
 // Status description

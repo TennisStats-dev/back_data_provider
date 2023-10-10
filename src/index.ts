@@ -5,7 +5,7 @@ import express from 'express'
 import config from './config'
 import logger from '@config/logger'
 // import { saveUpcomingMatches } from '@controllers/saveUpcomingMatchesController'
-import { getEndedMatchDetails, getPreMatchDetails } from './test'
+import { getAllPlayerEndedMatchesDetails, getEndedMatchDetails, getPreMatchDetails } from './test'
 import { saveEndedMatchesFromPrematches } from '@controllers/saveEndedMatchesFromPreMatchesController'
 import { saveUpcomingMatches } from '@controllers/saveUpcomingMatchesController'
 import { updateTournamentCircuit } from '@controllers/updateTournamentData'
@@ -33,6 +33,8 @@ app.get('/eventview/upcoming/:id', getPreMatchDetails)
 
 app.get('/eventview/ended/:id', getEndedMatchDetails)
 
+app.get('/matchhistory/:id', getAllPlayerEndedMatchesDetails)
+
 config.database.connection.connectDB()
 
 // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
@@ -43,10 +45,16 @@ app.listen(port, () => {
 })
 
 
+let cronJobInProgress = false
+
 const job = new CronJob(
-	'*/15 * * * *',
+	'*/2 * * * *',
 	async function () {
-		await runCron()
+		if (!cronJobInProgress) {
+			cronJobInProgress = true
+			await runCron()
+			cronJobInProgress = false
+		}
 	},
 	null,
 );

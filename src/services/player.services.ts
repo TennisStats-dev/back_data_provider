@@ -235,7 +235,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 		const playerData = await config.database.services.getters.getPlayer(api_id)
 
 		if (playerData === null) {
-			logger.warn(`It was impossible to save all history matches for player id: ${api_id}`)
+			logger.warn(`Player not found on DB when trying to save all them history matches - player id: ${api_id} `)
 			return
 		}
 
@@ -245,6 +245,9 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 
 		let newPlayerEndedMatchesStored = 0
 		let playerEndedMatchesalreadyStored = 0
+		let notEventviewForEndedMatch = 0
+		let toBeFixed = 0
+		let notStarted = 0
 		const playerEndedMatchesAPI = await getAllPlayerEndedMatchesFromAPI(api_id)
 
 		if (playerEndedMatchesAPI.length === 0) {
@@ -254,7 +257,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 			return Number(match.id)
 		})
 
-		const playerEndedMatchesDB = await config.database.services.getters.getAllPlayerEndedMatches(playerId)
+		const playerEndedMatchesDB = await config.database.services.getters.getAllPlayerEndedMatchesById(playerId)
 		let endedMatchesDBApiIds: number[] | undefined
 
 
@@ -279,7 +282,28 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 
 			const eventViewAPIResponse = await config.api.services.getEventView(apiId)
 
+			if (eventViewAPIResponse === undefined) {
+				const details = `!!! The match with the id ${api_id},  doesn't have an event view !!!`
+				logger.warn(details)
+
+				notEventviewForEndedMatch++
+
+				continue
+			}
+
 			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['2']) {
+				logger.info(`Ther is a match of the player history to be fixed (status 2)`)
+				
+				toBeFixed++
+
+				continue
+			}
+
+			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['0']) {
+				logger.info(`Ther is a match of the player history not started (status 0)`)
+				
+				notStarted++
+
 				continue
 			}
 
@@ -311,7 +335,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 
 			const { home, away } = await playerHandler(playersArray, tournament.type, matchGender)
 
-			const court: ICourt | null = await courtHanlder(eventViewAPIResponse?.extra?.stadium_data)
+			const court: ICourt | null = await courtHanlder(eventViewAPIResponse?.extra?.stadium_data, eventViewAPIResponse.id)
 
 			const pre_odds: IPreOdds | null = await preMatchOddsHandler(
 				Number(eventViewAPIResponse.bet365_id),
@@ -324,7 +348,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 					Number(eventViewAPIResponse.bet365_id),
 					Number(eventViewAPIResponse.sport_id),
 					tournament.type,
-					eventViewAPIResponse.extra.round,
+					eventViewAPIResponse.extra?.round,
 					tournament,
 					court,
 					home,
@@ -352,15 +376,14 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 				}
 
 				await config.database.services.savers.saveNewEndedMatch(endedMatchData)
-				console.log('partido guardado')
 
 				newPlayerEndedMatchesStored++
 			}
 		}
 
 		logger.info(
-			`${newPlayerEndedMatchesStored} SAVED ended matches || ${playerEndedMatchesalreadyStored} EXISTING ended matches on DB || ${
-				newPlayerEndedMatchesStored + playerEndedMatchesalreadyStored
+			`${newPlayerEndedMatchesStored} SAVED ended matches || ${playerEndedMatchesalreadyStored} EXISTING ended matches on DB || ${notEventviewForEndedMatch} Not even VIEW || ${toBeFixed} STATUS to be fixed || ${notStarted} STATUS to be started ${
+				newPlayerEndedMatchesStored + playerEndedMatchesalreadyStored + notEventviewForEndedMatch + toBeFixed + notStarted
 			} TOTAL ended matches for player with id: ${api_id} and name ${playerData.name}`,
 		)
 	} catch (err) {

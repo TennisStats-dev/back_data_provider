@@ -48,7 +48,7 @@ export const getMatchRound = (roundInput: string | undefined, api_id: number): I
 	const round = matchRound[Number(roundInput)]
 
 	if (round === undefined) {
-		logger.warn(`It was not possible to identify match ROUND for match with id: ${api_id}`)
+		logger.warn(`It was not possible to identify match ROUND (input: ${roundInput}) for match with id: ${api_id}`)
 		return undefined
 	} else {
 		return round
@@ -143,7 +143,7 @@ export const updateMatchData = async (
 		}
 
 		if (matchDB.court === undefined && eventViewAPIResponse.extra?.stadium_data !== undefined) {
-			const court: ICourt | null = await courtHanlder(eventViewAPIResponse?.extra?.stadium_data)
+			const court: ICourt | null = await courtHanlder(eventViewAPIResponse?.extra?.stadium_data, eventViewAPIResponse.id)
 			if (court !== null) {
 				matchDB.court = court
 			}
@@ -178,7 +178,7 @@ export const updateMatchData = async (
 				)
 				if (countryName === undefined) {
 					logger.warn(
-						`There is a tournament (id: ${tournamentDB.api_id}, name: ${tournamentDB.name}) with a not stored country : ${eventViewAPIResponse.extra.stadium_data.country}`,
+						`There is a tournament (id: ${tournamentDB.api_id}, name: ${tournamentDB.name}) with a not stored country : ${eventViewAPIResponse.extra.stadium_data.country} - match id: ${matchDB.api_id}`,
 					)
 				} else {
 					tournamentDB.cc = countryName.cc
@@ -196,6 +196,7 @@ export const getformattedResult = async (
 	away: IPlayer | IDoublesPlayer,
 	status: string,
 	matchId: number,
+	tournamentName: string
 ): Promise<IMatchStats['result']> => {
 	if (Number(status) === config.api.constants.matchStatus['5']) {
 		return 'cancelled'
@@ -204,7 +205,7 @@ export const getformattedResult = async (
 			Number(status) === config.api.constants.matchStatus['6']) &&
 		resultData === null
 	) {
-		const details = `API ISSUE: Result (ss) is NULL for match ${matchId} with status: ${status}`
+		const details = `API ISSUE: Result (ss) is NULL for match ${matchId} - tournament: ${tournamentName} with status: ${status} and players - id: ${home.api_id} name:  ${home.name} vs id: ${away.api_id} name:  ${away.name}`
 		await saveResultIssue(details, status, matchId, home, away)
 		return 'Not updated'
 	} else if (resultData === 'home' || resultData === 'away') {
@@ -235,7 +236,7 @@ export const getformattedResult = async (
 		if (resultIsCorrect) {
 			return arrayOfSets
 		} else {
-			const details = `API ISSUE: Result (ss) is not valid: ${resultData}, for match ${matchId} with status: ${status}`
+			const details = `API ISSUE: Result (ss) is not valid: ${resultData}, for match ${matchId} - tournament: ${tournamentName} with status: ${status} and players - id: ${home.api_id} name:  ${home.name} vs id: ${away.api_id} name:  ${away.name}`
 			await saveResultIssue(details, status, matchId, home, away)
 			return 'Not updated'
 		}
@@ -249,7 +250,6 @@ const saveResultIssue = async (
 	home: IPlayer | IDoublesPlayer,
 	away: IPlayer | IDoublesPlayer,
 ): Promise<void> => {
-	logger.warn(details)
 
 	const existingIssue = await config.database.services.getters.getEndedMatchesIssue(matchId)
 
@@ -310,6 +310,7 @@ export const createNewEndedMatchObject = async (
 		preMatchData.away,
 		status,
 		preMatchData.api_id,
+		preMatchData.tournament.name
 	)
 	const winner = getMatchWinner(formattedResult, preMatchData.home, preMatchData.away, preMatchData.api_id)
 

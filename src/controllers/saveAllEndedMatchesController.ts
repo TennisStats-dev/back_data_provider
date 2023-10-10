@@ -70,7 +70,7 @@ export const saveAllEndedMatches = async (_req: Request, _res: Response): Promis
 
 			const { home, away } = await playerHandler(playersArray, tournament.type, matchGender)
 
-			const court: ICourt | null = await courtHanlder(eventViewAPIResponse?.extra?.stadium_data)
+			const court: ICourt | null = await courtHanlder(eventViewAPIResponse?.extra?.stadium_data, eventViewAPIResponse.id)
 
 			const pre_odds: IPreOdds | null = await preMatchOddsHandler(Number(eventViewAPIResponse.bet365_id), Number(match.id))
 
@@ -194,7 +194,7 @@ export const saveAllEndedMatchesCron = async (): Promise<void> => {
 
 			const { home, away } = await playerHandler(playersArray, tournament.type, matchGender)
 
-			const court: ICourt | null = await courtHanlder(eventViewAPIResponse?.extra?.stadium_data)
+			const court: ICourt | null = await courtHanlder(eventViewAPIResponse?.extra?.stadium_data, eventViewAPIResponse.id)
 
 			const pre_odds: IPreOdds | null = await preMatchOddsHandler(Number(eventViewAPIResponse.bet365_id), Number(match.id))
 

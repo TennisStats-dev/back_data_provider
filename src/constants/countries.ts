@@ -488,6 +488,10 @@ export const countriesArray = [
 		name: 'South Korea',
 	},
 	{
+		cc: 'kr',
+		name: 'Republic of Korea',
+	},
+	{
 		cc: 'kw',
 		name: 'Kuwait',
 	},

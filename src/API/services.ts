@@ -118,8 +118,6 @@ const getMatchOdds = async (api_id: number): Promise<EventOdds> => {
 	}
 }
 
-
-
 export const SERVICES = {
 	getUpcomingMatches,
 	getEventView,

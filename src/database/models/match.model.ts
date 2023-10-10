@@ -22,12 +22,12 @@ const MatchSchema = new Schema<IMatch>(
 			first: {
 				win: { type: [String, String], default: undefined },
 				win_1st_set: { type: [String, String], default: undefined },
-				update: { type: Date },
+				time: { type: Date },
 			},
 			last: {
 				win: { type: [String, String], default: undefined },
 				win_1st_set: { type: [String, String], default: undefined },
-				time: { type: Date },
+				update: { type: Date },
 			},
 		},
 		// b365_start_time: { type: Date },

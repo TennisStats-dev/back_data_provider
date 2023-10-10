@@ -28,3 +28,18 @@ export const getEndedMatchDetails = async (req: Request, res: Response): Promise
     }
 }
 
+export const getAllPlayerEndedMatchesDetails = async (req: Request, res: Response): Promise<void> => {
+    
+    try {
+        const playerId = req.params.id
+    
+        const matchesDetails = await config.database.services.getters.getAllPlayerEndedMatchesByApi_id(Number(playerId))
+    
+        res.status(200).send({total: matchesDetails?.length, results: matchesDetails})
+    } catch (err) {
+        res.status(402).send(err)
+    }
+}
+
+
+

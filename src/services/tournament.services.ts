@@ -62,12 +62,14 @@ const getTournamentTypeAndGender = (
 
 	const isWomen = checkIfIsWomen(tournamentName)
 
-	const isMen = checkIfIsMen(tournamentName)
+	if (!tournamentName.includes(config.api.constants.circuit[2])) {
+		const isMen = checkIfIsMen(tournamentName)
 
-	if (!isWomen && !isMen) {
-		logger.warn(
-			`It was not possible to recognize GENDER for TOURNAMENT: ${tournamentName} with ID: ${tournamentId} - MATCH ID: ${matchId}`,
-		)
+		if (!isWomen && !isMen) {
+			logger.warn(
+				`It was not possible to recognize GENDER for TOURNAMENT: ${tournamentName} with ID: ${tournamentId} - MATCH ID: ${matchId}`,
+			)
+		}
 	}
 
 	if (isDoubles && isWomen) {
