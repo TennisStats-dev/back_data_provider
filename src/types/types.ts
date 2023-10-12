@@ -167,6 +167,14 @@ export interface IResultIssue {
 	details: string
 }
 
+export interface IStatusIssue {
+	matchId: number
+	home_name: string
+	away_name: string
+	est_time: Date
+	status: Status
+}
+
 export interface INotFoundMatch {
 	matchId: number
 	home: {

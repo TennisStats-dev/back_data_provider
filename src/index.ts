@@ -9,10 +9,9 @@ import { getAllPlayerEndedMatchesDetails, getEndedMatchDetails, getPreMatchDetai
 import { saveEndedMatchesFromPrematches } from '@controllers/saveEndedMatchesFromPreMatchesController'
 import { saveUpcomingMatches } from '@controllers/saveUpcomingMatchesController'
 import { updateTournamentCircuit } from '@controllers/updateTournamentData'
-import { saveAllEndedMatches } from '@controllers/saveAllEndedMatchesController'
 import { udpateEndedMatchesResult } from '@controllers/updateEndedMatchResult'
-import { CronJob } from 'cron'
-import { runCron } from '@controllers/runCron'
+import { runCron } from '@controllers/cronJobs'
+
 
 
 export const app = express()
@@ -24,8 +23,6 @@ app.get('/ping', (_, res) => {
 })
 
 app.get('/saveupcomingmatches', saveUpcomingMatches, saveEndedMatchesFromPrematches, udpateEndedMatchesResult)
-
-app.get('/saveallendedmatches', saveAllEndedMatches)
 
 app.get('/updatetournaments', updateTournamentCircuit)
 
@@ -45,21 +42,6 @@ app.listen(port, () => {
 })
 
 
-let cronJobInProgress = false
+runCron()
 
-const job = new CronJob(
-	'*/2 * * * *',
-	async function () {
-		if (!cronJobInProgress) {
-			cronJobInProgress = true
-			await runCron()
-			cronJobInProgress = false
-		}
-	},
-	null,
-);
-
-job.start()
-
-// 2228 50301 //59091
 

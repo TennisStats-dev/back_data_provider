@@ -1,12 +1,13 @@
 import logger from '@config/logger'
 import Court from '@database/models/court.model'
 import Match from '@database/models/match.model'
+import MatchIssue from '@database/models/statusIssue.model'
 import { Player } from '@database/models/player.model'
 import PreMatch from '@database/models/preMatch.model'
 import ResultIssue from '@database/models/resultIssue.model'
 import Tournament from '@database/models/tournament.model'
 import type { Document } from 'mongoose'
-import type { ICourt, IMatch, IPlayer, IPreMatch, IResultIssue, ITournament } from 'types/types'
+import type { ICourt, IMatch, IPlayer, IPreMatch, IResultIssue, IStatusIssue, ITournament } from 'types/types'
 
 const getCourt = async (api_id: number): Promise<(ICourt & Document) | null> => {
 	try {
@@ -160,9 +161,23 @@ const getAllTournaments = async (): Promise<Array<ITournament & Document> | null
 	}
 }
 
-const getEndedMatchesIssue = async (matchId: number): Promise<(IResultIssue & Document) | null> => {
+const getEndedMatchesResultIssue = async (matchId: number): Promise<(IResultIssue & Document) | null> => {
 	try {
 		const existingEndedMatchesIssue = await ResultIssue.findOne({
+			matchId,
+		})
+
+		return existingEndedMatchesIssue
+	} catch (err) {
+		console.log(err)
+		logger.error('Error getting one ended matches issues')
+		throw new Error('Error getting one ended matches issues')
+	}
+}
+
+const getEndedMatchesStatusIssue = async (matchId: number): Promise<(IStatusIssue & Document) | null> => {
+	try {
+		const existingEndedMatchesIssue = await MatchIssue.findOne({
 			matchId,
 		})
 
@@ -197,8 +212,9 @@ const GET = {
 	getAllPlayerEndedMatchesById,
 	getTournament,
 	getAllTournaments,
-	getEndedMatchesIssue,
+	getEndedMatchesResultIssue,
 	getAllEndedMatchesIssues,
+	getEndedMatchesStatusIssue,
 }
 
 export default GET

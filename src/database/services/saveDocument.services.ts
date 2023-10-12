@@ -3,11 +3,12 @@ import { Player } from '@database/models/player.model'
 import PreMatch from '@database/models/preMatch.model'
 import Tournament from '@database/models/tournament.model'
 import type { Document } from 'mongoose'
-import type { ICourt, IMatch, INotFoundMatch, IPlayer, IPreMatch, IResultIssue, ITournament } from 'types/types'
+import type { ICourt, IMatch, INotFoundMatch, IPlayer, IPreMatch, IResultIssue, IStatusIssue, ITournament } from 'types/types'
 import logger from '@config/logger'
 import Match from '@database/models/match.model'
 import ResultIssue from '@database/models/resultIssue.model'
 import MatchNotFound from '@database/models/notFountMatch'
+import StatusIssue from '@database/models/statusIssue.model'
 
 const saveNewCourt = async (courtData: ICourt): Promise<ICourt & Document> => {
 	try {
@@ -91,6 +92,20 @@ const saveNewResultIssue = async (issueData: IResultIssue): Promise<void> => {
 	}
 }
 
+const saveNewStatusIssue = async (issueData: IStatusIssue): Promise<void> => {
+	try {
+		const newIssue = new StatusIssue(issueData)
+
+		await newIssue.save()
+	} catch (err) {
+		console.log(err)
+		logger.error('Error when saving a new match issue')
+		throw new Error('Error when saving a new match issue')
+	}
+}
+
+
+
 const saveNewMatchNotFound = async (matchData: INotFoundMatch): Promise<void> => {
 	try {
 		const newMatchNotFound = new MatchNotFound(matchData)
@@ -111,6 +126,7 @@ const SAVE = {
 	saveNewEndedMatch,
 	saveNewResultIssue,
 	saveNewMatchNotFound,
+	saveNewStatusIssue,
 }
 
 export default SAVE

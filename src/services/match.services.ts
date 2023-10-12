@@ -5,7 +5,6 @@ import type {
 	ICourt,
 	IDoublesPlayer,
 	IGameStats,
-	IResultIssue,
 	IMatch,
 	IMatchStats,
 	IPlayer,
@@ -24,6 +23,7 @@ import { courtHanlder } from './court.services'
 import { getTournamentBestOfsets, getTournamentGround } from './tournament.services'
 import { countriesArray } from '@constants/countries'
 import type { EndedMatches } from '@API/types/endedMatches'
+import { saveResultIssue } from './issues.services'
 
 export const checkIfIsTennisMatch = (sportId: number): boolean => {
 	return sportId === 13
@@ -117,29 +117,34 @@ export const getUpcomingMatchesFromAPI = async (): Promise<UpcomingMatches[]> =>
 
 export const updateMatchData = async (
 	matchDB: IPreMatch,
-	matchAPI: UpcomingMatches,
 	eventViewAPIResponse: MatchView,
 ): Promise<void> => {
-	if (matchDB.bet365_id === undefined && matchAPI.bet365_id !== undefined) {
-		matchDB.bet365_id = Number(matchAPI.bet365_id)
+	if(matchDB.api_id === 7326830) {
+		console.log('-----------------------------------------------')
+		console.log('DB MATCH BEFORE UPDATE')
+		console.log(matchDB)
 	}
 
-	const preOdds = await preMatchOddsHandler(Number(matchAPI.bet365_id), matchDB.api_id)
+	if (matchDB.bet365_id === undefined && eventViewAPIResponse.bet365_id !== undefined) {
+		matchDB.bet365_id = Number(eventViewAPIResponse.bet365_id)
+	}
+
+	const preOdds = await preMatchOddsHandler(Number(eventViewAPIResponse.bet365_id), matchDB.api_id)
 	if (preOdds !== null) {
 		matchDB.pre_odds = preOdds
 	}
 
-	if (matchDB.status !== Number(matchAPI.time_status)) {
-		matchDB.status = getMatchStatus(Number(matchAPI.time_status), matchDB.api_id)
+	if (matchDB.status !== Number(eventViewAPIResponse.time_status)) {
+		matchDB.status = getMatchStatus(Number(eventViewAPIResponse.time_status), matchDB.api_id)
 	}
 
-	if (matchDB.est_time !== msToDateTime(matchAPI.time)) {
-		matchDB.est_time = msToDateTime(matchAPI.time)
+	if (matchDB.est_time !== msToDateTime(eventViewAPIResponse.time)) {
+		matchDB.est_time = msToDateTime(eventViewAPIResponse.time)
 	}
 
 	if (eventViewAPIResponse.extra !== undefined) {
 		if (matchDB.round === undefined && eventViewAPIResponse.extra?.round !== undefined) {
-			matchDB.round = getMatchRound(eventViewAPIResponse.extra.round, Number(matchAPI.id))
+			matchDB.round = getMatchRound(eventViewAPIResponse.extra.round, Number(eventViewAPIResponse.id))
 		}
 
 		if (matchDB.court === undefined && eventViewAPIResponse.extra?.stadium_data !== undefined) {
@@ -186,6 +191,13 @@ export const updateMatchData = async (
 			}
 
 			await tournamentDB.save()
+			
+			const updatedMatch = await tournamentDB.save()
+			if(matchDB.api_id === 7326830) {
+				console.log('-----------------------------------------------')
+				console.log('DB MATCH AFTER UPDATE')
+				console.log(updatedMatch)
+			}
 		}
 	}
 }
@@ -202,7 +214,7 @@ export const getformattedResult = async (
 		return 'cancelled'
 	} else if (
 		(Number(status) === config.api.constants.matchStatus['3'] ||
-			Number(status) === config.api.constants.matchStatus['6'] || Number(status) === config.api.constants.matchStatus['9']) &&
+			Number(status) === config.api.constants.matchStatus['6'] || Number(status) === config.api.constants.matchStatus['9'] || Number(status) === config.api.constants.matchStatus['5']) &&
 		resultData === null
 	) {
 		const details = `API ISSUE: Result (ss) is NULL for match ${matchId} - tournament: ${tournamentName} with status: ${status} and players - id: ${home.api_id} name:  ${home.name} vs id: ${away.api_id} name:  ${away.name}`
@@ -241,30 +253,6 @@ export const getformattedResult = async (
 			return 'Not updated'
 		}
 	}
-}
-
-const saveResultIssue = async (
-	details: string,
-	status: string,
-	matchId: number,
-	home: IPlayer | IDoublesPlayer,
-	away: IPlayer | IDoublesPlayer,
-): Promise<void> => {
-
-	const existingIssue = await config.database.services.getters.getEndedMatchesIssue(matchId)
-
-	if (existingIssue !== null) {
-		return
-	}
-
-	const resultIssueObject: IResultIssue = {
-		matchId,
-		home,
-		away,
-		status: getMatchStatus(Number(status), matchId),
-		details,
-	}
-	await config.database.services.savers.saveNewResultIssue(resultIssueObject)
 }
 
 export const getMatchWinner = (

@@ -20,6 +20,7 @@ import { courtHanlder } from './court.services'
 import { preMatchOddsHandler } from './odds.services'
 import { createNewEndedMatchObject, createNewPreMatchObject } from './match.services'
 import { msToDateTime } from '@utils/msToDateTime'
+import { saveMatchToBeFixedIssue } from './issues.services'
 
 const checkIfIsPlayer = (playerName: string): boolean => {
 	return !checkIfArrayIncludesSubstring(config.api.formats.Team, playerName)
@@ -232,23 +233,26 @@ export const getAllPlayerEndedMatchesFromAPI = async (api_id: number): Promise<E
 }
 
 export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
+	const iteratedPlayerId = api_id
+	let iteratedMatchId = 0
+	
 	try {
 		const playerData = await config.database.services.getters.getPlayer(api_id)
 
 		if (playerData === null) {
-			logger.warn(`Player not found on DB when trying to save all them history matches - player id: ${api_id} `)
+			logger.warn(`Player not found on DB when trying to save their history matches - player id: ${api_id} `)
 			return
 		}
 
-		logger.info(`Saving ended matches for player: id: ${api_id} name: ${playerData.name}`)
+		// logger.info(`Saving ended matches for player: id: ${api_id} name: ${playerData.name}`)
 
 		const playerId = playerData._id
 
-		let newPlayerEndedMatchesStored = 0
-		let playerEndedMatchesalreadyStored = 0
-		let notEventviewForEndedMatch = 0
-		let toBeFixed = 0
-		let notStarted = 0
+		// let newPlayerEndedMatchesStored = 0
+		// let playerEndedMatchesalreadyStored = 0
+		// let notEventviewForEndedMatch = 0
+		// let toBeFixed = 0
+		// let notStarted = 0
 		const playerEndedMatchesAPI = await getAllPlayerEndedMatchesFromAPI(api_id)
 
 		if (playerEndedMatchesAPI.length === 0) {
@@ -266,7 +270,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 			endedMatchesDBApiIds = playerEndedMatchesDB.map((match) => {
 				return match.api_id
 			})
-			playerEndedMatchesalreadyStored = endedMatchesDBApiIds.length
+			// playerEndedMatchesalreadyStored = endedMatchesDBApiIds.length
 		}
 
 		const playerEndedMatchesNotStored = endedMatchesAPIApiIds.filter((apiId) => {
@@ -280,22 +284,22 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 
 
 		for (const apiId of playerEndedMatchesNotStored) {
-
+			iteratedMatchId = apiId
 			const eventViewAPIResponse = await config.api.services.getEventView(apiId)
 
 			if (eventViewAPIResponse === undefined) {
 				const details = `!!! The match with the id ${api_id},  doesn't have an event view !!!`
 				logger.warn(details)
 
-				notEventviewForEndedMatch++
+				// notEventviewForEndedMatch++
 
 				continue
 			}
 
 			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['2']) {
-				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history to be fixed (status 2)`)
-				
-				toBeFixed++
+				// logger.info(`There is a match (${eventViewAPIResponse.id}) in tournament: ${eventViewAPIResponse.league.name} - date: ${msToDateTime(eventViewAPIResponse.time).toString()} -  of the player history to be fixed (status 2)`)
+				await saveMatchToBeFixedIssue(apiId, eventViewAPIResponse.home.name, eventViewAPIResponse.away.name, eventViewAPIResponse.time_status, msToDateTime(eventViewAPIResponse.time))
+				// toBeFixed++
 
 				continue
 			}
@@ -303,7 +307,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['0']) {
 				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history not started (status 0)`)
 				
-				notStarted++
+				// notStarted++
 
 				continue
 			}
@@ -378,16 +382,17 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 
 				await config.database.services.savers.saveNewEndedMatch(endedMatchData)
 
-				newPlayerEndedMatchesStored++
+				// newPlayerEndedMatchesStored++
 			}
 		}
 
-		logger.info(
-			`${newPlayerEndedMatchesStored} SAVED ended matches || ${playerEndedMatchesalreadyStored} EXISTING ended matches on DB || ${notEventviewForEndedMatch} Not even VIEW || ${toBeFixed} STATUS to be fixed || ${notStarted} STATUS to be started ${
-				newPlayerEndedMatchesStored + playerEndedMatchesalreadyStored + notEventviewForEndedMatch + toBeFixed + notStarted
-			} TOTAL ended matches for player with id: ${api_id} and name ${playerData.name}`,
-		)
+		// logger.info(
+		// 	`${newPlayerEndedMatchesStored} SAVED ended matches || ${playerEndedMatchesalreadyStored} EXISTING ended matches on DB || ${notEventviewForEndedMatch} Not even VIEW || ${toBeFixed} STATUS to be fixed || ${notStarted} STATUS to be started ${
+		// 		newPlayerEndedMatchesStored + playerEndedMatchesalreadyStored + notEventviewForEndedMatch + toBeFixed + notStarted
+		// 	} TOTAL ended matches for player with id: ${api_id} and name ${playerData.name}`,
+		// )
 	} catch (err) {
+		logger.error(`Error saving history of player: ${iteratedPlayerId} and match ${iteratedMatchId}`)
 		logger.error(err)
 	}
 }

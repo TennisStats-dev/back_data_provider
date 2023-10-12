@@ -3,8 +3,8 @@ import type { Request, Response, NextFunction } from 'express'
 import config from '@config/index'
 import { gender, type } from '@constants/data'
 import type { ICourt, IPlayer, IPreMatch, IPreOdds, ITournament } from 'types/types'
-import { createNewPreMatchObject, getUpcomingMatchesFromAPI, updateMatchData } from '@services/match.services'
-import { createNewPlayerObject, playerHandler, saveAllPlayerMatches } from '@services/player.services'
+import { createNewPreMatchObject, getUpcomingMatchesFromAPI } from '@services/match.services'
+import { createNewPlayerObject, playerHandler } from '@services/player.services'
 import { courtHanlder } from '@services/court.services'
 import { tournamentHandler } from '@services/tournament.services'
 import { preMatchOddsHandler } from '@services/odds.services'
@@ -20,12 +20,13 @@ export const saveUpcomingMatches = async (_req: Request, _res: Response, next: N
 
 export const saveUpcomingMatchesCron = async (): Promise<void> => {
 	try {
-		logger.info('-----------------------------------------------')
 		const startDate = new Date()
-		logger.info(`Save upcoming matches started at: ${startDate.toString()}`)
+		// logger.info('===============================================')
+		// logger.info(`SAVE UPCOMING MATCHES started at: ${startDate.toString()}`)
+		// logger.info('===============================================')
 
 		const newMatchesSaved: IPreMatch[] = []
-		let preMatchUpdated = 0
+		// let preMatchUpdated = 0
 		let preMatchPadel = 0
 
 		const allUpcomingMatchesAPI = await getUpcomingMatchesFromAPI()
@@ -51,9 +52,9 @@ export const saveUpcomingMatchesCron = async (): Promise<void> => {
 			}
 
 			if (matchDB !== null && matchDB !== undefined) {
-				await updateMatchData(matchDB, match, eventViewAPIResponse)
-				await matchDB.save()
-				preMatchUpdated++
+				// await updateMatchData(matchDB, match, eventViewAPIResponse)
+				// await matchDB.save()
+				// preMatchUpdated++
 				continue
 			}
 
@@ -75,8 +76,8 @@ export const saveUpcomingMatchesCron = async (): Promise<void> => {
 
 			const { home, away } = await playerHandler(playersArray, tournament.type, matchGender)
 
-			await saveAllPlayerMatches(home.api_id)
-			await saveAllPlayerMatches(away.api_id)
+			// await saveAllPlayerMatches(home.api_id)
+			// await saveAllPlayerMatches(away.api_id)
 
 			const court: ICourt | null = await courtHanlder(eventViewAPIResponse?.extra?.stadium_data, eventViewAPIResponse.id)
 
@@ -110,10 +111,12 @@ export const saveUpcomingMatchesCron = async (): Promise<void> => {
 
 		const finishDate = new Date()
 		const duration = msToStringTime(finishDate.getTime() - startDate.getTime())
+		logger.info('===============================================')
 		logger.info(`${newMatchesSaved.length} SAVED pre matches`)
 		logger.info(`${preMatchPadel} AVOIDED Padel pre matches`)
-		logger.info(`${preMatchUpdated} UPDATED pre matches`)
+		// logger.info(`${preMatchUpdated} UPDATED pre matches`)
 		logger.info(`The process finished at: ${finishDate.toString()}, TOTAL DURATION :', ${duration}`)
+		logger.info('===============================================')
 	} catch (err) {
 		logger.error(err)
 	}

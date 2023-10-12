@@ -18,9 +18,10 @@ export const saveEndedMatchesFromPrematches = async (
 
 export const saveEndedMatchesFromPrematchesCron = async (): Promise<void> => {
 	try {
-		logger.info('-----------------------------------------------')
 		const startDate = new Date()
-		logger.info(`Save ended matches from upcoming matches started at: ${startDate.toString()}`)
+		// logger.info('-----------------------------------------------')
+		// logger.info(`SAVE ENDED MATCHES FROM PREMATCHES started at: ${startDate.toString()}`)
+		// logger.info('-----------------------------------------------')
 
 		const upcomingMatchesDB = await config.database.services.getters.getAllPreMatches()
 
@@ -111,10 +112,11 @@ export const saveEndedMatchesFromPrematchesCron = async (): Promise<void> => {
 
 		const finishDate = new Date()
 		const duration = msToStringTime(finishDate.getTime() - startDate.getTime())
+		logger.info('-----------------------------------------------')
 		logger.info(`${newEndedMatchesSaves.length} SAVED ended matches`)
 		logger.info(`${deletedPreMatchesCount} DELETED pre matches`)
 		logger.info(`The process finished at: ${finishDate.toString()}, TOTAL DURATION :', ${duration}`)
-
+		logger.info('-----------------------------------------------')
 	} catch (err) {
 		logger.error(err)
 	}
