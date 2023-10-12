@@ -177,7 +177,8 @@ export const type = {
 	women: 'W',
 	menDoubles: 'MD',
 	womenDoubles: 'WD',
-	menMixed: 'M - MD',
+	menMixed: 'M_MD',
+	menMixedOld: 'M - MD'
 } as const
 
 export const typeArray = Array.from(Object.values(type))

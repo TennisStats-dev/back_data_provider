@@ -202,7 +202,7 @@ export const getformattedResult = async (
 		return 'cancelled'
 	} else if (
 		(Number(status) === config.api.constants.matchStatus['3'] ||
-			Number(status) === config.api.constants.matchStatus['6']) &&
+			Number(status) === config.api.constants.matchStatus['6'] || Number(status) === config.api.constants.matchStatus['9']) &&
 		resultData === null
 	) {
 		const details = `API ISSUE: Result (ss) is NULL for match ${matchId} - tournament: ${tournamentName} with status: ${status} and players - id: ${home.api_id} name:  ${home.name} vs id: ${away.api_id} name:  ${away.name}`

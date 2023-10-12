@@ -219,6 +219,7 @@ export const getAllPlayerEndedMatchesFromAPI = async (api_id: number): Promise<E
 	let page = 1
 
 	const playerEndedMatchesApiResponse = await config.api.services.getPlayerEndedMatches(page, api_id)
+	
 	playerEndedMatches.push(...playerEndedMatchesApiResponse.results)
 
 	do {
@@ -292,7 +293,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 			}
 
 			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['2']) {
-				logger.info(`Ther is a match of the player history to be fixed (status 2)`)
+				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history to be fixed (status 2)`)
 				
 				toBeFixed++
 
@@ -300,7 +301,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 			}
 
 			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['0']) {
-				logger.info(`Ther is a match of the player history not started (status 0)`)
+				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history not started (status 0)`)
 				
 				notStarted++
 
