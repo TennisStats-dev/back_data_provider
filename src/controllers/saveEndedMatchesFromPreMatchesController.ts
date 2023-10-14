@@ -121,3 +121,5 @@ export const saveEndedMatchesFromPrematchesCron = async (): Promise<void> => {
 		logger.error(err)
 	}
 }
+
+

@@ -273,6 +273,35 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 			// playerEndedMatchesalreadyStored = endedMatchesDBApiIds.length
 		}
 
+		// Logic to search unwanted duplicated ended matches stored on DB and delete them
+		if (playerEndedMatchesDB !== null) {
+
+			const dbMatchesNotStoredOnAPI = playerEndedMatchesDB.filter(match => !endedMatchesAPIApiIds.includes(match.api_id))
+			
+			dbMatchesNotStoredOnAPI.forEach(async (incorrectStoredMatch) => {
+				const incorrectMatchEventView = await config.database.services.getters.getEndedMatch(incorrectStoredMatch.api_id)
+
+				if (incorrectMatchEventView === null) {
+					return
+				}
+
+				const duplicatedMatch = playerEndedMatchesAPI.filter(match => {
+					return (
+					((Number(match.home.id) === incorrectMatchEventView.home.api_id && Number(match.away.id)) === incorrectMatchEventView.away.api_id) &&
+						Number(match.league.id) === incorrectMatchEventView.tournament.api_id
+					)	
+				})
+
+				if (duplicatedMatch.length > 0) {
+					logger.warn(`There is a duplicated match on DB with id: ${incorrectStoredMatch.api_id}, and the correct stored match is ${duplicatedMatch[0].id}`)
+					const duplicatedMatchisDeleted = await config.database.services.deleters.deleteEndedMatch(incorrectStoredMatch.api_id)
+					if (duplicatedMatchisDeleted) {
+						logger.info(`Duplicated match (${incorrectStoredMatch.api_id}) has been deleted for player ${playerData.name} (${playerData.api_id})`)
+					}
+				}
+			})
+		}
+
 		const playerEndedMatchesNotStored = endedMatchesAPIApiIds.filter((apiId) => {
 			if (endedMatchesDBApiIds === undefined) {
 				return apiId
@@ -280,8 +309,6 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 				return !(endedMatchesDBApiIds?.includes(apiId) ?? false)
 			}
 		})
-
-
 
 		for (const apiId of playerEndedMatchesNotStored) {
 			iteratedMatchId = apiId
