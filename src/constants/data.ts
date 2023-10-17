@@ -105,7 +105,7 @@ export const matchStatus = {
 	[API.constants.matchStatus[99]]: 99,
 } as const
 
-export const endedMatchStatus = [3, 5, 6, 8, 9]
+export const endedMatchStatus = [3, 5, 6, 8, 9, 10, 11]
 
 export const grounds = {
 	[API.constants.ground.clay]: {

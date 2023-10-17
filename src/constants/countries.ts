@@ -252,6 +252,10 @@ export const countriesArray = [
 		name: 'Ecuador',
 	},
 	{
+		cc: 'ENGLAND',
+		name: 'England',
+	},
+	{
 		cc: 'ee',
 		name: 'Estonia',
 	},

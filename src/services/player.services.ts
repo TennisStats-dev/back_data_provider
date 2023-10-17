@@ -220,7 +220,7 @@ export const getAllPlayerEndedMatchesFromAPI = async (api_id: number): Promise<E
 	let page = 1
 
 	const playerEndedMatchesApiResponse = await config.api.services.getPlayerEndedMatches(page, api_id)
-	
+
 	playerEndedMatches.push(...playerEndedMatchesApiResponse.results)
 
 	do {
@@ -235,7 +235,7 @@ export const getAllPlayerEndedMatchesFromAPI = async (api_id: number): Promise<E
 export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 	const iteratedPlayerId = api_id
 	let iteratedMatchId = 0
-	
+
 	try {
 		const playerData = await config.database.services.getters.getPlayer(api_id)
 
@@ -265,7 +265,6 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 		const playerEndedMatchesDB = await config.database.services.getters.getAllPlayerEndedMatchesById(playerId)
 		let endedMatchesDBApiIds: number[] | undefined
 
-
 		if (playerEndedMatchesDB !== null) {
 			endedMatchesDBApiIds = playerEndedMatchesDB.map((match) => {
 				return match.api_id
@@ -275,9 +274,8 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 
 		// Logic to search unwanted duplicated ended matches stored on DB and delete them
 		if (playerEndedMatchesDB !== null) {
+			const dbMatchesNotStoredOnAPI = playerEndedMatchesDB.filter((match) => !endedMatchesAPIApiIds.includes(match.api_id))
 
-			const dbMatchesNotStoredOnAPI = playerEndedMatchesDB.filter(match => !endedMatchesAPIApiIds.includes(match.api_id))
-			
 			dbMatchesNotStoredOnAPI.forEach(async (incorrectStoredMatch) => {
 				const incorrectMatchEventView = await config.database.services.getters.getEndedMatch(incorrectStoredMatch.api_id)
 
@@ -285,18 +283,24 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 					return
 				}
 
-				const duplicatedMatch = playerEndedMatchesAPI.filter(match => {
+				const duplicatedMatch = playerEndedMatchesAPI.filter((match) => {
 					return (
-					((Number(match.home.id) === incorrectMatchEventView.home.api_id && Number(match.away.id)) === incorrectMatchEventView.away.api_id) &&
-						Number(match.league.id) === incorrectMatchEventView.tournament.api_id
-					)	
+						(Number(match.home.id) === incorrectMatchEventView.home.api_id && Number(match.away.id)) ===
+							incorrectMatchEventView.away.api_id && Number(match.league.id) === incorrectMatchEventView.tournament.api_id
+					)
 				})
 
 				if (duplicatedMatch.length > 0) {
-					logger.warn(`There is a duplicated match on DB with id: ${incorrectStoredMatch.api_id}, and the correct stored match is ${duplicatedMatch[0].id}`)
-					const duplicatedMatchisDeleted = await config.database.services.deleters.deleteEndedMatch(incorrectStoredMatch.api_id)
+					logger.warn(
+						`There is a duplicated match on DB with id: ${incorrectStoredMatch.api_id}, and the correct stored match is ${duplicatedMatch[0].id}`,
+					)
+					const duplicatedMatchisDeleted = await config.database.services.deleters.deleteEndedMatch(
+						incorrectStoredMatch.api_id,
+					)
 					if (duplicatedMatchisDeleted) {
-						logger.info(`Duplicated match (${incorrectStoredMatch.api_id}) has been deleted for player ${playerData.name} (${playerData.api_id})`)
+						logger.info(
+							`Duplicated match (${incorrectStoredMatch.api_id}) has been deleted for player ${playerData.name} (${playerData.api_id})`,
+						)
 					}
 				}
 			})
@@ -325,7 +329,13 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 
 			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['2']) {
 				// logger.info(`There is a match (${eventViewAPIResponse.id}) in tournament: ${eventViewAPIResponse.league.name} - date: ${msToDateTime(eventViewAPIResponse.time).toString()} -  of the player history to be fixed (status 2)`)
-				await saveMatchToBeFixedIssue(apiId, eventViewAPIResponse.home.name, eventViewAPIResponse.away.name, eventViewAPIResponse.time_status, msToDateTime(eventViewAPIResponse.time))
+				await saveMatchToBeFixedIssue(
+					apiId,
+					eventViewAPIResponse.home.name,
+					eventViewAPIResponse.away.name,
+					eventViewAPIResponse.time_status,
+					msToDateTime(eventViewAPIResponse.time),
+				)
 				// toBeFixed++
 
 				continue
@@ -333,11 +343,23 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 
 			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['0']) {
 				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history not started (status 0)`)
-				
 				// notStarted++
-
 				continue
 			}
+
+			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['4']) {
+				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history POSTPONED (status 4)`)
+				// notStarted++
+				continue
+			}
+
+			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['7']) {
+				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history INTERRUPTED (status 7)`)
+				// notStarted++
+				continue
+			}
+
+
 
 			const tournament: ITournament = await tournamentHandler(
 				Number(eventViewAPIResponse.id),
@@ -407,7 +429,11 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 					continue
 				}
 
-				await config.database.services.savers.saveNewEndedMatch(endedMatchData)
+				const savedMatch = await config.database.services.savers.saveNewEndedMatch(endedMatchData)
+
+				if (api_id === 384932) {
+					console.log('*/*/* partido guardado:', savedMatch)
+				}
 
 				// newPlayerEndedMatchesStored++
 			}
