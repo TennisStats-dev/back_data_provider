@@ -252,6 +252,10 @@ export const countriesArray = [
 		name: 'Ecuador',
 	},
 	{
+		cc: 'ENGLAND',
+		name: 'England',
+	},
+	{
 		cc: 'ee',
 		name: 'Estonia',
 	},
@@ -486,6 +490,10 @@ export const countriesArray = [
 	{
 		cc: 'kr',
 		name: 'South Korea',
+	},
+	{
+		cc: 'kr',
+		name: 'Republic of Korea',
 	},
 	{
 		cc: 'kw',
@@ -778,6 +786,10 @@ export const countriesArray = [
 	{
 		cc: 'sc',
 		name: 'Seychelles',
+	},
+	{
+		cc: 'SCOTLAND',
+		name: 'Scotland',
 	},
 	{
 		cc: 'sd',

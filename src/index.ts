@@ -4,8 +4,15 @@ import 'dotenv/config'
 import express from 'express'
 import config from './config'
 import logger from '@config/logger'
-import { saveUpcomingMatches } from '@controllers/matchControllers'
-import { getMatchDetails } from './test'
+// import { saveUpcomingMatches } from '@controllers/saveUpcomingMatchesController'
+import { getAllPlayerEndedMatchesDetails, getEndedMatchDetails, getPreMatchDetails } from './test'
+import { saveEndedMatchesFromPrematches } from '@controllers/saveEndedMatchesFromPreMatchesController'
+import { saveUpcomingMatches } from '@controllers/saveUpcomingMatchesController'
+import { updateTournamentCircuit } from '@controllers/updateTournamentData'
+import { udpateEndedMatchesResult } from '@controllers/updateEndedMatchResult'
+import { runCron } from '@controllers/cronJobs'
+
+
 
 export const app = express()
 app.use(express.json())
@@ -15,9 +22,15 @@ app.get('/ping', (_, res) => {
 	res.send('pong')
 })
 
-app.get('/upcomingmatches', saveUpcomingMatches)
+app.get('/saveupcomingmatches', saveUpcomingMatches, saveEndedMatchesFromPrematches, udpateEndedMatchesResult)
 
-app.get('/eventview/:id', getMatchDetails)
+app.get('/updatetournaments', updateTournamentCircuit)
+
+app.get('/eventview/upcoming/:id', getPreMatchDetails)
+
+app.get('/eventview/ended/:id', getEndedMatchDetails)
+
+app.get('/matchhistory/:id', getAllPlayerEndedMatchesDetails)
 
 config.database.connection.connectDB()
 
@@ -27,3 +40,8 @@ const port = config.server.port || '0.0.0.0:$PORT'
 app.listen(port, () => {
 	logger.info(`Server running on port ${port}`)
 })
+
+
+runCron()
+
+

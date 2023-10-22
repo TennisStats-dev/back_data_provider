@@ -1,9 +1,26 @@
 import config from '@config/index'
-import type { Gender, IDoublesPlayer, IMatchPlayers, IMatchPlayersObject, IPlayer, Type } from 'types/schemas'
+import type {
+	Gender,
+	ICourt,
+	IDoublesPlayer,
+	IMatchPlayers,
+	IMatchPlayersObject,
+	IPlayer,
+	IPreOdds,
+	ITournament,
+	Type,
+} from 'types/types'
 import { checkIfArrayIncludesSubstring } from '@utils/checkArrayIncludesSubstring'
 import { countriesCCArray } from '@constants/countries'
 import logger from '@config/logger'
-import { type } from '@constants/data'
+import { gender, type } from '@constants/data'
+import type { EndedMatches } from '@API/types/endedMatches'
+import { tournamentHandler } from './tournament.services'
+import { courtHanlder } from './court.services'
+import { preMatchOddsHandler } from './odds.services'
+import { createNewEndedMatchObject, createNewPreMatchObject } from './match.services'
+import { msToDateTime } from '@utils/msToDateTime'
+import { saveMatchToBeFixedIssue } from './issues.services'
 
 const checkIfIsPlayer = (playerName: string): boolean => {
 	return !checkIfArrayIncludesSubstring(config.api.formats.Team, playerName)
@@ -169,19 +186,18 @@ export const playerHandler = async (
 	tournamentType: Type,
 	matchGender: Gender,
 ): Promise<IMatchPlayers> => {
-
 	let savedPlayers: IMatchPlayersObject = {
 		home: undefined,
 		away: undefined,
 	}
 
 	if (tournamentType === type.menDoubles || tournamentType === type.womenDoubles) {
-		savedPlayers = await saveDoublesPlayers(playersArray,matchGender)
+		savedPlayers = await saveDoublesPlayers(playersArray, matchGender)
 	} else if (tournamentType === type.menMixed) {
-		if(checkIfIsPlayer(playersArray[0].name)) {
+		if (checkIfIsPlayer(playersArray[0].name)) {
 			savedPlayers = await savePlayer(playersArray)
 		} else {
-			savedPlayers = await saveDoublesPlayers(playersArray,matchGender)
+			savedPlayers = await saveDoublesPlayers(playersArray, matchGender)
 		}
 	} else {
 		savedPlayers = await savePlayer(playersArray)
@@ -194,7 +210,244 @@ export const playerHandler = async (
 		}
 	} else {
 		throw new Error(
-			`PROCESS: Player handler | INFO: Player handler missed and at least one player is undefined | DETAILS: home: ${playersArray[0].api_id} - away: ${playersArray[0].api_id}`,
+			`PROCESS: Player handler | INFO: Player handler missed and at least one player is undefined | DETAILS: home: ${playersArray[0].api_id} - away: ${playersArray[1].api_id}`,
 		)
+	}
+}
+
+export const getAllPlayerEndedMatchesFromAPI = async (api_id: number): Promise<EndedMatches[]> => {
+	const playerEndedMatches: EndedMatches[] = []
+	let page = 1
+
+	const playerEndedMatchesApiResponse = await config.api.services.getPlayerEndedMatches(page, api_id)
+
+	playerEndedMatches.push(...playerEndedMatchesApiResponse.results)
+
+	do {
+		page += 1
+		const apiResponse = await config.api.services.getPlayerEndedMatches(page, api_id)
+		playerEndedMatches.push(...apiResponse.results)
+	} while (playerEndedMatches.length < playerEndedMatchesApiResponse.pager.total)
+
+	return playerEndedMatches
+}
+
+export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
+	const iteratedPlayerId = api_id
+	let iteratedMatchId = 0
+
+	try {
+		const playerData = await config.database.services.getters.getPlayer(api_id)
+
+		if (playerData === null) {
+			logger.warn(`Player not found on DB when trying to save their history matches - player id: ${api_id} `)
+			return
+		}
+
+		// logger.info(`Saving ended matches for player: id: ${api_id} name: ${playerData.name}`)
+
+		const playerId = playerData._id
+
+		// let newPlayerEndedMatchesStored = 0
+		// let playerEndedMatchesalreadyStored = 0
+		// let notEventviewForEndedMatch = 0
+		// let toBeFixed = 0
+		// let notStarted = 0
+		const playerEndedMatchesAPI = await getAllPlayerEndedMatchesFromAPI(api_id)
+
+		if (playerEndedMatchesAPI.length === 0) {
+			return
+		}
+		const endedMatchesAPIApiIds = playerEndedMatchesAPI.map((match) => {
+			return Number(match.id)
+		})
+
+		const playerEndedMatchesDB = await config.database.services.getters.getAllPlayerEndedMatchesById(playerId)
+		let endedMatchesDBApiIds: number[] | undefined
+
+		if (playerEndedMatchesDB !== null) {
+			endedMatchesDBApiIds = playerEndedMatchesDB.map((match) => {
+				return match.api_id
+			})
+			// playerEndedMatchesalreadyStored = endedMatchesDBApiIds.length
+		}
+
+		// Logic to search unwanted duplicated ended matches stored on DB and delete them
+		if (playerEndedMatchesDB !== null) {
+			const dbMatchesNotStoredOnAPI = playerEndedMatchesDB.filter((match) => !endedMatchesAPIApiIds.includes(match.api_id))
+
+			dbMatchesNotStoredOnAPI.forEach(async (incorrectStoredMatch) => {
+				const incorrectMatchEventView = await config.database.services.getters.getEndedMatch(incorrectStoredMatch.api_id)
+
+				if (incorrectMatchEventView === null) {
+					return
+				}
+
+				const duplicatedMatch = playerEndedMatchesAPI.filter((match) => {
+					return (
+						(Number(match.home.id) === incorrectMatchEventView.home.api_id && Number(match.away.id)) ===
+							incorrectMatchEventView.away.api_id && Number(match.league.id) === incorrectMatchEventView.tournament.api_id
+					)
+				})
+
+				if (duplicatedMatch.length > 0) {
+					logger.warn(
+						`There is a duplicated match on DB with id: ${incorrectStoredMatch.api_id}, and the correct stored match is ${duplicatedMatch[0].id}`,
+					)
+					const duplicatedMatchisDeleted = await config.database.services.deleters.deleteEndedMatch(
+						incorrectStoredMatch.api_id,
+					)
+					if (duplicatedMatchisDeleted) {
+						logger.info(
+							`Duplicated match (${incorrectStoredMatch.api_id}) has been deleted for player ${playerData.name} (${playerData.api_id})`,
+						)
+					}
+				}
+			})
+		}
+
+		const playerEndedMatchesNotStored = endedMatchesAPIApiIds.filter((apiId) => {
+			if (endedMatchesDBApiIds === undefined) {
+				return apiId
+			} else {
+				return !(endedMatchesDBApiIds?.includes(apiId) ?? false)
+			}
+		})
+
+		for (const apiId of playerEndedMatchesNotStored) {
+			iteratedMatchId = apiId
+			const eventViewAPIResponse = await config.api.services.getEventView(apiId)
+
+			if (eventViewAPIResponse === undefined) {
+				const details = `!!! The match with the id ${api_id},  doesn't have an event view !!!`
+				logger.warn(details)
+
+				// notEventviewForEndedMatch++
+
+				continue
+			}
+
+			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['2']) {
+				// logger.info(`There is a match (${eventViewAPIResponse.id}) in tournament: ${eventViewAPIResponse.league.name} - date: ${msToDateTime(eventViewAPIResponse.time).toString()} -  of the player history to be fixed (status 2)`)
+				await saveMatchToBeFixedIssue(
+					apiId,
+					eventViewAPIResponse.home.name,
+					eventViewAPIResponse.away.name,
+					eventViewAPIResponse.time_status,
+					msToDateTime(eventViewAPIResponse.time),
+				)
+				// toBeFixed++
+
+				continue
+			}
+
+			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['0']) {
+				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history not started (status 0)`)
+				// notStarted++
+				continue
+			}
+
+			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['4']) {
+				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history POSTPONED (status 4)`)
+				// notStarted++
+				continue
+			}
+
+			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['7']) {
+				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history INTERRUPTED (status 7)`)
+				// notStarted++
+				continue
+			}
+
+			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['10']) {
+				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history SUSPENDED (status 10)`)
+				// notStarted++
+				continue
+			}
+
+
+
+			const tournament: ITournament = await tournamentHandler(
+				Number(eventViewAPIResponse.id),
+				Number(eventViewAPIResponse.league.id),
+				eventViewAPIResponse.league.name,
+				eventViewAPIResponse.league.cc,
+				eventViewAPIResponse,
+			)
+
+			const matchGender =
+				tournament.type === type.women || tournament.type === type.womenDoubles ? gender.female : gender.male
+
+			const playersArray: IPlayer[] = [
+				createNewPlayerObject(
+					Number(eventViewAPIResponse.home.id),
+					eventViewAPIResponse.home.name,
+					matchGender,
+					eventViewAPIResponse.home.cc,
+				),
+				createNewPlayerObject(
+					Number(eventViewAPIResponse.away.id),
+					eventViewAPIResponse.away.name,
+					matchGender,
+					eventViewAPIResponse.away.cc,
+				),
+			]
+
+			const { home, away } = await playerHandler(playersArray, tournament.type, matchGender)
+
+			const court: ICourt | null = await courtHanlder(eventViewAPIResponse?.extra?.stadium_data, eventViewAPIResponse.id)
+
+			const pre_odds: IPreOdds | null = await preMatchOddsHandler(
+				Number(eventViewAPIResponse.bet365_id),
+				Number(eventViewAPIResponse.id),
+			)
+
+			if (home !== null && away !== null) {
+				const preMatchData = createNewPreMatchObject(
+					Number(eventViewAPIResponse.id),
+					Number(eventViewAPIResponse.bet365_id),
+					Number(eventViewAPIResponse.sport_id),
+					tournament.type,
+					eventViewAPIResponse.extra?.round,
+					tournament,
+					court,
+					home,
+					away,
+					eventViewAPIResponse.time_status,
+					msToDateTime(eventViewAPIResponse.time),
+					pre_odds,
+				)
+
+				const { ss, stats, events, time_status } = eventViewAPIResponse
+
+				const endedMatchData = await createNewEndedMatchObject(
+					time_status,
+					preMatchData,
+					ss,
+					stats?.aces,
+					stats?.double_faults,
+					stats?.win_1st_serve,
+					stats?.break_point_conversions,
+					events,
+				)
+
+				if (endedMatchData === undefined) {
+					continue
+				}
+
+				await config.database.services.savers.saveNewEndedMatch(endedMatchData)
+
+				// newPlayerEndedMatchesStored++
+			}
+		}
+
+		// logger.info(
+		// 	`${newPlayerEndedMatchesStored} SAVED ended matches || ${playerEndedMatchesalreadyStored} EXISTING ended matches on DB || ${notEventviewForEndedMatch} Not even VIEW || ${toBeFixed} STATUS to be fixed || ${notStarted} STATUS to be started ${
+		// 		newPlayerEndedMatchesStored + playerEndedMatchesalreadyStored + notEventviewForEndedMatch + toBeFixed + notStarted
+		// 	} TOTAL ended matches for player with id: ${api_id} and name ${playerData.name}`,
+		// )
+	} catch (err) {
+		logger.error(`Error saving history of player: ${iteratedPlayerId} and match ${iteratedMatchId}`)
+		logger.error(err)
 	}
 }

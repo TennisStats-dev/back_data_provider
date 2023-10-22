@@ -1,4 +1,4 @@
-import type { ICourt } from 'types/schemas'
+import type { ICourt } from 'types/types'
 import { Schema, model } from 'mongoose'
 
 const courtSchema = new Schema<ICourt>(

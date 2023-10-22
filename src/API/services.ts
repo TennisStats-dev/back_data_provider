@@ -5,6 +5,7 @@ import type { TeamMembers, TeamMembersRes } from '@API/types/teamMembers'
 import type { UpcomingMatchesRes } from '@API/types/upcomingMatches'
 import type { EventOdds, EventOddsRes } from './types/eventOdds'
 import { createError } from '@utils/createError'
+import type { EndedMatchesRes } from './types/endedMatches'
 
 const getUpcomingMatches = async (page: number = 1): Promise<UpcomingMatchesRes> => {
 	try {
@@ -20,6 +21,44 @@ const getUpcomingMatches = async (page: number = 1): Promise<UpcomingMatchesRes>
 		return upcomingMatches
 	} catch (err) {
 		throw createError(err, 'get upcoming matches')
+	}
+}
+
+const getEndedMatches = async (page: number = 1): Promise<EndedMatchesRes> => {
+	try {
+		const res = await axios.get(`${config.api.endpoints.baseURLs.endedMatches}`, {
+			params: {
+				[config.api.endpoints.params.keys.token]: config.api.endpoints.params.values.token,
+				[config.api.endpoints.params.keys.sport_id]: config.api.endpoints.params.values.tennisID,
+				[config.api.endpoints.params.keys.page]: page,
+			},
+		})
+
+		const endedMatches: EndedMatchesRes = res.data
+
+		return endedMatches
+	} catch (err) {
+		console.log(err)
+		throw createError(err, 'get ended matches')
+	}
+}
+const getPlayerEndedMatches = async (page: number = 1, api_id: number): Promise<EndedMatchesRes> => {
+	try {
+		const res = await axios.get(`${config.api.endpoints.baseURLs.endedMatches}`, {
+			params: {
+				[config.api.endpoints.params.keys.token]: config.api.endpoints.params.values.token,
+				[config.api.endpoints.params.keys.sport_id]: config.api.endpoints.params.values.tennisID,
+				[config.api.endpoints.params.keys.team_id]: api_id,
+				[config.api.endpoints.params.keys.page]: page,
+			},
+		})
+
+		const endedMatches: EndedMatchesRes = res.data
+
+		return endedMatches
+	} catch (err) {
+		console.log(err)
+		throw createError(err, 'get ended matches')
 	}
 }
 
@@ -83,5 +122,7 @@ export const SERVICES = {
 	getUpcomingMatches,
 	getEventView,
 	getTeamMembers,
-	getMatchOdds
+	getMatchOdds,
+	getEndedMatches,
+	getPlayerEndedMatches,
 }

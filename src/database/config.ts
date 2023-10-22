@@ -17,7 +17,7 @@ function mongo(): void {
 	} else {
 		if (!(process.env.NODE_ENV === 'development')) {
 			mongoose
-			.connect(dbURL)
+			.connect(testDbURL)
 			.then(() => {
 				logger.info('MODE: production - Connected to PRODUCTION DB of mongoDB')
 			})

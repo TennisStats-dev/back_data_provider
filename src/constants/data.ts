@@ -1,6 +1,12 @@
 import { API } from "@API/index"
 
 export const matchRound = {
+	[API.constants.matchRounds[1]]: 'F',
+	[API.constants.matchRounds[2]]: 'SF',
+	[API.constants.matchRounds[3]]: 'QF',
+	[API.constants.matchRounds[4]]: 'R16',
+	[API.constants.matchRounds[5]]: 'R32',
+	[API.constants.matchRounds[6]]: 'R64',
 	[API.constants.matchRounds[14]]: 'QR1',
 	[API.constants.matchRounds[15]]: 'QR2',
 	[API.constants.matchRounds[16]]: 'QR3',
@@ -14,8 +20,15 @@ export const matchRound = {
 	[API.constants.matchRounds[28]]: 'SF',
 	[API.constants.matchRounds[29]]: 'F',
 	[API.constants.matchRounds[44]]: 'QR',
+	[API.constants.matchRounds[45]]: 'QR',
+	[API.constants.matchRounds[46]]: 'QR',
 	[API.constants.matchRounds[54]]: 'QR',
+	[API.constants.matchRounds[60]]: 'QR',
 	[API.constants.matchRounds[62]]: 'QR',
+	[API.constants.matchRounds[64]]: 'QR',
+	[API.constants.matchRounds[164]]: 'QR',
+	[API.constants.matchRounds[166]]: 'QR',
+	[API.constants.matchRounds[168]]: 'QR',
 } as const
 
 // Status description
@@ -92,6 +105,8 @@ export const matchStatus = {
 	[API.constants.matchStatus[99]]: 99,
 } as const
 
+export const endedMatchStatus = [3, 5, 6, 8, 9]
+
 export const grounds = {
 	[API.constants.ground.clay]: {
 		surface: 'Clay',
@@ -162,7 +177,8 @@ export const type = {
 	women: 'W',
 	menDoubles: 'MD',
 	womenDoubles: 'WD',
-	menMixed: 'M - MD',
+	menMixed: 'M_MD',
+	menMixedOld: 'M - MD'
 } as const
 
 export const typeArray = Array.from(Object.values(type))
@@ -171,21 +187,4 @@ export const bestOfSets = {
 	[API.constants.bestOfSets[3]]: 3,
 	[API.constants.bestOfSets[5]]: 5,
 } as const 
-
-export const consistency = {
-	worst: 0, // Lack of info about number of points
-	bad: 1, // Number of points well known but not their order
-	good: 2, // all points and their order well known
-} as const
-
-export const consistencyArray = Array.from(Object.values(consistency))
-
-export const playerOption = {
-	1: 1,
-	2: 2,
-} as const
-
-export const playerOptionArray = Array.from(Object.values(playerOption))
-
-export const hours = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23] as const
 

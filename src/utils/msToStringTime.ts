@@ -1,4 +1,4 @@
-export const msToTime = (ms: number): string => {
+export const msToStringTime = (ms: number): string => {
     let h,m,s;
 h = Math.floor(ms/1000/60/60);
 m = Math.floor((ms/1000/60/60 - h)*60);
@@ -12,3 +12,4 @@ const result = `${h}h ${m}m ${s}s`
 
 return result
 }
+

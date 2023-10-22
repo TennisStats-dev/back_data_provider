@@ -1,6 +1,6 @@
 import config from '@config/index'
 import { bestOfSets, gender, grounds, type } from '@constants/data'
-import type { Gender, ITournament, Type } from 'types/schemas'
+import type { Gender, ITournament, Type } from 'types/types'
 import { checkIfArrayIncludesSubstring } from '@utils/checkArrayIncludesSubstring'
 import logger from '@config/logger'
 import { countriesArray, countriesCCArray } from '@constants/countries'
@@ -23,10 +23,10 @@ const checkIfIsMen = (tournamentName: string): boolean => {
 	return checkIfArrayIncludesSubstring(config.api.formats.menTournament, tournamentName)
 }
 
-const getTournamentCircuit = (
+export const getTournamentCircuit = (
 	tournamentName: string,
 	tournamentId: number,
-	matchId: number,
+	matchId?: number,
 ): ITournament['circuit'] | undefined => {
 	let circuitIndex: number | undefined
 
@@ -62,12 +62,14 @@ const getTournamentTypeAndGender = (
 
 	const isWomen = checkIfIsWomen(tournamentName)
 
-	const isMen = checkIfIsMen(tournamentName)
+	if (!tournamentName.includes(config.api.constants.circuit[2])) {
+		const isMen = checkIfIsMen(tournamentName)
 
-	if (!isWomen && !isMen) {
-		logger.warn(
-			`It was not possible to recognize GENDER for TOURNAMENT: ${tournamentName} with ID: ${tournamentId} - MATCH ID: ${matchId}`,
-		)
+		if (!isWomen && !isMen) {
+			logger.warn(
+				`It was not possible to recognize GENDER for TOURNAMENT: ${tournamentName} with ID: ${tournamentId} - MATCH ID: ${matchId}`,
+			)
+		}
 	}
 
 	if (isDoubles && isWomen) {
@@ -93,7 +95,7 @@ const getTournamentTypeAndGender = (
 	}
 }
 
-const getTournamentBestOfsets = (
+export const getTournamentBestOfsets = (
 	bestOfSetsInput: string | undefined,
 	tournamentName: string,
 	tournamentId: number,
@@ -113,18 +115,18 @@ const getTournamentBestOfsets = (
 	}
 }
 
-const getTournamentGround = (
+export const getTournamentGround = (
 	groundInput: string | undefined,
 	tournamentName: string,
 	tournamentId: number,
 	matchId: number,
 ): ITournament['ground'] => {
-
 	if (groundInput !== undefined) {
-		
 		// If to monitorize Synthetic surface tournaments and check the real surface.
 		if (groundInput === API.constants.ground.syntheticOutdoor || groundInput === API.constants.ground.syntheticIndoor) {
-			logger.warn(`There is a match with a synthetic surface for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`)
+			logger.warn(
+				`There is a match with a synthetic surface for tournament: ${tournamentName} - ID: ${tournamentId} - MATCH ID: ${matchId}`,
+			)
 		}
 
 		const ground = grounds[groundInput]
@@ -151,7 +153,6 @@ const createNewCompletTournamentObject = (
 	bestOfSetsInput: string | undefined,
 	groundInput: string | undefined,
 ): ITournament => {
-
 	const { type } = getTournamentTypeAndGender(name, api_id, matchId)
 
 	const circuit = getTournamentCircuit(name, api_id, matchId)
@@ -182,7 +183,7 @@ const createNewCompletTournamentObject = (
 		}
 	} else if (cc === null || cc === '') {
 		const countryName = countriesArray.find((country) => country.name === countryInput)
-		
+
 		if (countryName != null) {
 			tournamentData.cc = countryName.cc
 		}
@@ -197,7 +198,6 @@ const createNewIncompletTournamentObject = (
 	name: string,
 	cc: string | null,
 ): ITournament => {
-
 	const { type } = getTournamentTypeAndGender(name, api_id, matchId)
 
 	const circuit = getTournamentCircuit(name, api_id, matchId)
