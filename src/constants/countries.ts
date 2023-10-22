@@ -788,6 +788,10 @@ export const countriesArray = [
 		name: 'Seychelles',
 	},
 	{
+		cc: 'SCOTLAND',
+		name: 'Scotland',
+	},
+	{
 		cc: 'sd',
 		name: 'Sudan',
 	},

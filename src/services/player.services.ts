@@ -359,6 +359,12 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 				continue
 			}
 
+			if (Number(eventViewAPIResponse.time_status) === config.api.constants.matchStatus['10']) {
+				logger.info(`There is a match (${eventViewAPIResponse.id}) of the player history SUSPENDED (status 10)`)
+				// notStarted++
+				continue
+			}
+
 
 
 			const tournament: ITournament = await tournamentHandler(
@@ -429,11 +435,7 @@ export const saveAllPlayerMatches = async (api_id: number): Promise<void> => {
 					continue
 				}
 
-				const savedMatch = await config.database.services.savers.saveNewEndedMatch(endedMatchData)
-
-				if (api_id === 384932) {
-					console.log('*/*/* partido guardado:', savedMatch)
-				}
+				await config.database.services.savers.saveNewEndedMatch(endedMatchData)
 
 				// newPlayerEndedMatchesStored++
 			}

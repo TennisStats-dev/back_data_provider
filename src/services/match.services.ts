@@ -115,16 +115,7 @@ export const getUpcomingMatchesFromAPI = async (): Promise<UpcomingMatches[]> =>
 	return allUpcomingMatches
 }
 
-export const updateMatchData = async (
-	matchDB: IPreMatch,
-	eventViewAPIResponse: MatchView,
-): Promise<void> => {
-	if(matchDB.api_id === 7326830) {
-		console.log('-----------------------------------------------')
-		console.log('DB MATCH BEFORE UPDATE')
-		console.log(matchDB)
-	}
-
+export const updateMatchData = async (matchDB: IPreMatch, eventViewAPIResponse: MatchView): Promise<void> => {
 	if (matchDB.bet365_id === undefined && eventViewAPIResponse.bet365_id !== undefined) {
 		matchDB.bet365_id = Number(eventViewAPIResponse.bet365_id)
 	}
@@ -191,13 +182,6 @@ export const updateMatchData = async (
 			}
 
 			await tournamentDB.save()
-			
-			const updatedMatch = await tournamentDB.save()
-			if(matchDB.api_id === 7326830) {
-				console.log('-----------------------------------------------')
-				console.log('DB MATCH AFTER UPDATE')
-				console.log(updatedMatch)
-			}
 		}
 	}
 }
@@ -208,13 +192,15 @@ export const getformattedResult = async (
 	away: IPlayer | IDoublesPlayer,
 	status: string,
 	matchId: number,
-	tournamentName: string
+	tournamentName: string,
 ): Promise<IMatchStats['result']> => {
 	if (Number(status) === config.api.constants.matchStatus['5']) {
 		return 'cancelled'
 	} else if (
-		(Number(status) === config.api.constants.matchStatus['3'] || Number(status) === config.api.constants.matchStatus['4'] ||
-			Number(status) === config.api.constants.matchStatus['6'] || Number(status) === config.api.constants.matchStatus['9'] ) &&
+		(Number(status) === config.api.constants.matchStatus['3'] ||
+			Number(status) === config.api.constants.matchStatus['6'] ||
+			Number(status) === config.api.constants.matchStatus['8'] ||
+			Number(status) === config.api.constants.matchStatus['9']) &&
 		resultData === null
 	) {
 		const details = `API ISSUE: Result (ss) is NULL for match ${matchId} - tournament: ${tournamentName} with status: ${status} and players - id: ${home.api_id} name:  ${home.name} vs id: ${away.api_id} name:  ${away.name}`
@@ -298,7 +284,7 @@ export const createNewEndedMatchObject = async (
 		preMatchData.away,
 		status,
 		preMatchData.api_id,
-		preMatchData.tournament.name
+		preMatchData.tournament.name,
 	)
 	const winner = getMatchWinner(formattedResult, preMatchData.home, preMatchData.away, preMatchData.api_id)
 
@@ -367,7 +353,6 @@ export const getAllEndedMatchesFromAPI = async (): Promise<EndedMatches[]> => {
 
 	do {
 		page += 1
-		console.log(page)
 		const apiResponse = await config.api.services.getEndedMatches(page)
 		allEndedMatches.push(...apiResponse.results)
 	} while (page < 100)

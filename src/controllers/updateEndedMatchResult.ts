@@ -42,7 +42,7 @@ export const udpateEndedMatchesResultCron = async (): Promise<void> => {
 
 			const eventViewAPIResponse = await config.api.services.getEventView(issue.matchId)
 
-			if (eventViewAPIResponse.ss !== null) {
+			if (eventViewAPIResponse?.ss !== null && eventViewAPIResponse?.ss !== undefined) {
 				const formattedResult = await getformattedResult(
 					eventViewAPIResponse.ss,
 					issue.home,
