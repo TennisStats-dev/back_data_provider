@@ -5,6 +5,7 @@ import { udpateEndedMatchesResultCron } from './updateEndedMatchResult'
 import { CronJob } from 'cron'
 import { savePlayersHistoriesCron } from './saveMatchesHistories'
 import { updateUpcomingMatchesDataCron } from './updateUpcomingMatchesData'
+import { selfPing } from './selfPing'
 
 const saveUpcomingCronJob = (): void => {
 	try {
@@ -97,9 +98,34 @@ const udpateEndedMatchesResultCronJob = (): void => {
 	}
 }
 
+const selfPingCronJob = (): void => {
+	try {
+		let jobInProgress = false
+
+		const saveUpcomingMatchesjob = new CronJob(
+			'*/14 * * * *',
+			async function () {
+				if (!jobInProgress) {
+					jobInProgress = true
+					await selfPing()
+					jobInProgress = false
+				}
+			},
+			null,
+		)
+
+		saveUpcomingMatchesjob.start()
+	} catch (error) {
+		console.log(error)
+		logger.error('Error while executing update ended matches result cron')
+	}
+
+}
+
 export const runCron = (): void => {
 	saveUpcomingCronJob()
 	updateUpcomingAndSaveEndedCronJob()
 	SavePlayerHistoriesCronJob()
 	udpateEndedMatchesResultCronJob()
+	selfPingCronJob()
 }
